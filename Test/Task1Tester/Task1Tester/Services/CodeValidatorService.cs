@@ -27,25 +27,30 @@ public static class CodeValidatorService
             var code = File.ReadAllText(codePath);
 
             // 0. Rule: Required Header (Page 1, Rule 5.1)
-            // Header format:
+            // Header format must be present for ALL questions 01-05:
             // // ******************************
             // // * 11900-9403xx Program Start *
             // // ******************************
-            // where xx is 01, 02, 03, 04, or 05
             
-            // Look for the pattern anywhere in the file (Rule 5.1)
-            string pattern = @"// \*{30}\r?\n// \* 11900-94030[1-5] Program Start \*\r?\n// \*{30}";
-            bool headerValid = Regex.IsMatch(code, pattern);
+            var missingHeaders = new List<string>();
+            for (int i = 1; i <= 5; i++)
+            {
+                string xx = i.ToString("D2");
+                string specificPattern = $@"// \*{{30}}\r?\n// \* 11900-9403{xx} Program Start \*\r?\n// \*{{30}}";
+                if (!Regex.IsMatch(code, specificPattern))
+                {
+                    missingHeaders.Add(xx);
+                }
+            }
 
-            if (!headerValid)
+            if (missingHeaders.Count > 0)
             {
                 violations.Add(new Violation("Code Violation", 
-                    "Rule 5.1: Missing or incorrect program header.\n" +
-                    "Expected at least once:\n" +
+                    $"Rule 5.1: Missing or incorrect program headers for question(s): {string.Join(", ", missingHeaders)}.\n" +
+                    "Each question section must start with:\n" +
                     "// ******************************\n" +
                     "// * 11900-9403xx Program Start *\n" +
-                    "// ******************************\n" +
-                    "where xx is 01, 02, 03, 04, or 05."));
+                    "// ******************************"));
             }
 
             // 1. Rule: No 'Go To' (119003B14 Page 1, Rule 6.3)
