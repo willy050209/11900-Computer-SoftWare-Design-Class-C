@@ -1,4 +1,4 @@
-// filepath: Services/PdfValidatorService.cs
+﻿// filepath: Services/PdfValidatorService.cs
 namespace Task1Tester.Services;
 
 public static class PdfValidatorService
@@ -24,7 +24,7 @@ public static class PdfValidatorService
             var text = PdfTextExtractor.GetTextFromPage(firstPage, new SimpleTextExtractionStrategy());
 
             // Normalize spaces for comparison
-            string normalizedText = Regex.Replace(text, @"\s+", "");
+            string normalizedText = NormalizeForCompare(text);
 
             // Page 10 specified header fields: 姓名, 術科測試編號, 座號, 日期
             CheckRequirement(normalizedText, $"姓名：{expected.Name}", "Name", violations);
@@ -101,7 +101,7 @@ public static class PdfValidatorService
 
     private static void CheckRequirement(string text, string pattern, string label, List<Violation> violations)
     {
-        string normalizedPattern = Regex.Replace(pattern, @"\s+", "");
+        string normalizedPattern = NormalizeForCompare(pattern);
         if (!text.Contains(normalizedPattern))
         {
             violations.Add(new Violation("PDF Header", $"Missing or incorrect {label}. Expected pattern: '{pattern}'"));
@@ -122,12 +122,15 @@ public static class PdfValidatorService
     private static string ExtractSection(string fullText, string header)
     {
         var lines = fullText.Split(['\n', '\r'], StringSplitOptions.RemoveEmptyEntries);
-        var startIndex = Array.FindIndex(lines, l => l.Contains(header));
+        string normalizedHeader = NormalizeForCompare(header);
+        var startIndex = Array.FindIndex(lines, l => NormalizeForCompare(l).Contains(normalizedHeader));
         if (startIndex == -1) return string.Empty;
 
         // Take lines until the next section marker or specific end indicators
+        // Use normalized check for "題結果" to be consistent
+        string normalizedBoundary = NormalizeForCompare("題結果");
         var sectionLines = lines.Skip(startIndex)
-                               .TakeWhile((line, index) => index == 0 || !line.Contains("題結果"))
+                               .TakeWhile((line, index) => index == 0 || !NormalizeForCompare(line).Contains(normalizedBoundary))
                                .Select(l => l.Trim());
         
         return string.Join("\n", sectionLines).Trim();
@@ -135,7 +138,24 @@ public static class PdfValidatorService
 
     private static string NormalizeForCompare(string content)
     {
+        if (string.IsNullOrEmpty(content)) return string.Empty;
+
+        // Convert full-width to half-width
+        var chars = content.ToCharArray();
+        for (int i = 0; i < chars.Length; i++)
+        {
+            if (chars[i] == 0x3000) // Full-width space
+            {
+                chars[i] = (char)0x0020;
+            }
+            else if (chars[i] >= 0xFF01 && chars[i] <= 0xFF5E)
+            {
+                chars[i] = (char)(chars[i] - 0xFEE0);
+            }
+        }
+        string normalized = new(chars);
+
         // Remove spaces, tabs, and specific characters that might differ in rendering but not in data
-        return Regex.Replace(content, @"\s+", "");
+        return Regex.Replace(normalized, @"\s+", "");
     }
 }
