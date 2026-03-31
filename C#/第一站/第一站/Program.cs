@@ -10,7 +10,6 @@ var output = $"{name,-10}{no}\n{id,-13}{date}\n";
 // * 11900-940301 Program Start *
 // ******************************
 {
-    ///*
     bool IsPalindromeFor(string input)
     {
         for (int index = 0; index < input.Length / 2;)
@@ -22,37 +21,7 @@ var output = $"{name,-10}{no}\n{id,-13}{date}\n";
         }
         return true;
     }
-    //*/
 
-    /*
-    bool IsPalindromeWhile(string input)
-    {
-        int index = 0;
-        while (index < input.Length / 2)
-        {
-            if (input[index] != input[^++index])
-            {
-                return false;
-            }
-        }
-        return true;
-    }
-    //*/
-
-    /*
-    bool IsPalindromeDoWhile(string input)
-    {
-        int index = 0;
-        do
-        {
-            if (input[index] != input[^++index])
-            {
-                return false;
-            }
-        } while (index < input.Length / 2);
-        return true;
-    }
-    //*/
 
     var path = @"./1060301.SM";
     var input = File.ReadAllText(path);
@@ -132,7 +101,7 @@ var output = $"{name,-10}{no}\n{id,-13}{date}\n";
 }
 
 // ******************************
-// * 11900-940304 Program Start *
+// * 11900-940305 Program Start *
 // ******************************
 {
     var path = @"./1060305.SM";
@@ -176,4 +145,4 @@ pd.PrintPage += (_,e) =>
     e.Graphics?.DrawString(output, new System.Drawing.Font("Consolas", 12), System.Drawing.Brushes.Black, new System.Drawing.PointF(10, 10));
 };
 
-//pd.Print();
+pd.Print();
