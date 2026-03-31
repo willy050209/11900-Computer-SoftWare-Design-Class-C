@@ -83,11 +83,17 @@ public static class PdfValidatorService
 
                 if (string.IsNullOrWhiteSpace(userSection))
                 {
-                    violations.Add(new Violation("PDF Content", $"Rule Violation: Missing section output for '{header}'"));
+                    violations.Add(new Violation("PDF Content", $"Rule Violation: Missing section output for '{header}'. Could not find this section in your PDF."));
                 }
                 else if (NormalizeForCompare(userSection) != NormalizeForCompare(ansSection))
                 {
-                    violations.Add(new Violation("PDF Content", $"Rule Violation: Output mismatch for '{header}'"));
+                    string userPreview = userSection.Length > 100 ? userSection.Substring(0, 100) + "..." : userSection;
+                    string ansPreview = ansSection.Length > 100 ? ansSection.Substring(0, 100) + "..." : ansSection;
+                    
+                    violations.Add(new Violation("PDF Content", 
+                        $"Rule Violation: Output mismatch for '{header}'.\n" +
+                        $"Expected (start): {ansPreview}\n" +
+                        $"Actual (start):   {userPreview}"));
                 }
             }
         }
@@ -104,7 +110,7 @@ public static class PdfValidatorService
         string normalizedPattern = NormalizeForCompare(pattern);
         if (!text.Contains(normalizedPattern))
         {
-            violations.Add(new Violation("PDF Header", $"Missing or incorrect {label}. Expected pattern: '{pattern}'"));
+            violations.Add(new Violation("PDF Header", $"Missing or incorrect {label}. The PDF content does not contain the required string: '{pattern}'. Please ensure the header format is exactly as required."));
         }
     }
 

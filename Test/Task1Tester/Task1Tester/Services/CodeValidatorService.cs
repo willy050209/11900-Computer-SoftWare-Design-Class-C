@@ -27,9 +27,11 @@ public static class CodeValidatorService
             var code = File.ReadAllText(codePath);
 
             // 1. Rule: No 'Go To' (119003B14 Page 1, Rule 6.3)
-            if (Regex.IsMatch(code, @"\bgoto\b", RegexOptions.IgnoreCase))
+            var gotoMatch = Regex.Match(code, @"\bgoto\b", RegexOptions.IgnoreCase);
+            if (gotoMatch.Success)
             {
-                violations.Add(new Violation("Code Violation", "Rule 6.3: Use of 'Go To' is strictly prohibited."));
+                int lineNo = code.Take(gotoMatch.Index).Count(c => c == '\n') + 1;
+                violations.Add(new Violation("Code Violation", $"Rule 6.3: Use of 'Go To' is strictly prohibited. Found on line {lineNo}."));
             }
 
             // 2. Rule: Use only built-in/system provided I/O and conversion (Page 1, Rule 6.4)
@@ -47,15 +49,22 @@ public static class CodeValidatorService
             foreach (var ns in suspiciousNamespaces)
             {
                 if (code.Contains(ns, StringComparison.OrdinalIgnoreCase))
-                    violations.Add(new Violation("Code Warning", $"Potential Rule 6.4 Violation: Using advanced namespace '{ns}'. Ensure only essential I/O functions are used."));
+                {
+                    int lineNo = code.Substring(0, code.IndexOf(ns, StringComparison.OrdinalIgnoreCase)).Count(c => c == '\n') + 1;
+                    violations.Add(new Violation("Code Warning", $"Potential Rule 6.4 Violation: Using advanced namespace '{ns}' on line {lineNo}. Ensure only essential I/O functions are used."));
+                }
             }
 
             // Check for specific forbidden methods that bypass algorithm requirements
             string[] forbiddenMethods = [".Sort(", ".Reverse(", "Math.Max(", "Math.Min(", "Math.Sqrt(", "Math.Pow("];
             foreach (var method in forbiddenMethods)
             {
-                if (code.Contains(method, StringComparison.OrdinalIgnoreCase))
-                    violations.Add(new Violation("Code Violation", $"Rule 6.4: Prohibited built-in method '{method}' found. Algorithms must be implemented manually."));
+                int index = code.IndexOf(method, StringComparison.OrdinalIgnoreCase);
+                if (index >= 0)
+                {
+                    int lineNo = code.Substring(0, index).Count(c => c == '\n') + 1;
+                    violations.Add(new Violation("Code Violation", $"Rule 6.4: Prohibited built-in method '{method}' found on line {lineNo}. Algorithms must be implemented manually."));
+                }
             }
 
 
