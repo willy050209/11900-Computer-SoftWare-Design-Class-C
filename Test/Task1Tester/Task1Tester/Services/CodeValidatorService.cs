@@ -28,28 +28,20 @@ public static class CodeValidatorService
 
             // 0. Rule: Required Header (Page 1, Rule 5.1)
             // Header format:
-            // ******************************
-            // * 11900-940304 Program Start *
-            // ******************************
+            // // ******************************
+            // // * 11900-9403xx Program Start *
+            // // ******************************
             // where xx is 01, 02, 03, 04, or 05
-            var lines = code.Split(['\n', '\r'], StringSplitOptions.RemoveEmptyEntries);
-            bool headerValid = false;
-            if (lines.Length >= 3)
-            {
-                string line1 = lines[0].Trim();
-                string line2 = lines[1].Trim();
-                string line3 = lines[2].Trim();
-                
-                headerValid = line1 == "// ******************************" &&
-                             Regex.IsMatch(line2, @"^// \* 11900-94030[1-5] Program Start \*$") &&
-                             line3 == "// ******************************";
-            }
+            
+            // Look for the pattern anywhere in the file (Rule 5.1)
+            string pattern = @"// \*{30}\r?\n// \* 11900-94030[1-5] Program Start \*\r?\n// \*{30}";
+            bool headerValid = Regex.IsMatch(code, pattern);
 
             if (!headerValid)
             {
                 violations.Add(new Violation("Code Violation", 
-                    "Rule 5.1: Missing or incorrect program header at the beginning of the file.\n" +
-                    "Expected exactly:\n" +
+                    "Rule 5.1: Missing or incorrect program header.\n" +
+                    "Expected at least once:\n" +
                     "// ******************************\n" +
                     "// * 11900-9403xx Program Start *\n" +
                     "// ******************************\n" +
