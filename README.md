@@ -25,9 +25,41 @@
 ### 執行術科第一站自動化測試
 在 `Test/Task1Tester/Task1Tester` 目錄下執行：
 ```powershell
-dotnet run -- "考生程式路徑(Program.cs)" "PDF輸出路徑" "正確答案.pdf" "考生姓名" "准考證號" "座號"
+dotnet run -- <code_path> <user_pdf_path> <ans_pdf_path> <name> <test_no> <seat_no> <loop_type>
 ```
+
+#### 參數說明：
+- **code_path**: 考生程式原始碼路徑 (e.g., `Program.cs`)。
+- **user_pdf_path**: 考生輸出的 PDF 路徑。
+- **ans_pdf_path**: 參考答案 PDF 路徑 (`ans.pdf`)。
+- **name**: 考生姓名。
+- **test_no**: 術科測試編號 (准考證號)。
+- **seat_no**: 座號。
+- **loop_type**: 術科測驗現場抽選到的迴圈類型，可選：`for`, `while`, `do` (代表 do-while)。
+
+#### 範例：
+```powershell
+dotnet run -- "../../C#/第一站/第一站/Program.cs" "output.pdf" "../../ans.pdf" "王小明" "112590001" "001" "for"
+```
+
+## 進階測試規範 (依據 119003B14 規定)
+
+### 程式碼檢查 (Code Validation)
+- **規則 5.1 (新增)**: 程式碼中必須包含正確的標頭註解區塊，包含題號 `01` 至 `05` 之一：
+  ```csharp
+  // ******************************
+  // * 11900-9403xx Program Start *
+  // ******************************
+  ```
+- **規則 6.1 & 6.2**: **禁止混用迴圈類型**。系統會驗證程式碼是否僅使用了指定抽中的迴圈類型 (`for`, `while`, 或 `do-while`)。若缺少迴圈結構，將視為「直接輸出結果」之違規。
+- **規則 6.3**: 禁止使用 `Go To` 指令 (偵測到將標註行號)。
+- **規則 6.4**: 禁止使用內建演算法函數 (如 `Math.Sqrt`, `Array.Sort` 等)。系統會顯示違規行號供快速修正。
+
+### PDF 輸出檢查 (PDF Validation)
+- **字元寬度相容性**: 系統會自動校正全形/半形字元與空格，確保驗證結果不受輸入法差異影響。
+- **詳細錯誤回饋**: 若 PDF 內容不符，系統會顯示「預期內容」與「實際內容」的對比摘要，協助您定位輸出錯誤。
 
 ## 注意事項
 - 請確保系統已安裝 .NET 10 SDK。
-- PDF 處理採用 iText 7 (9.x) 與 Bouncy Castle 以支援現代加密與文字提取。
+- PDF 處理採用 iText 7 (9.x) 與 Bouncy Castle。
+- 測試工具會自動處理 C# 與 VB.NET 的語法差異與 BOM 編碼。
