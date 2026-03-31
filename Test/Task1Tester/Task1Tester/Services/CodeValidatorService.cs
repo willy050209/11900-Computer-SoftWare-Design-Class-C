@@ -6,7 +6,7 @@ public static class CodeValidatorService
     /// <summary>
     /// Validates source code (C# or VB.NET) against 119003B14 Level C requirements.
     /// </summary>
-    public static (bool Valid, List<Violation> Violations) Validate(string codePath)
+    public static (bool Valid, List<Violation> Violations) Validate(string codePath, string expectedLoopType)
     {
         var violations = new List<Violation>();
         try
@@ -68,24 +68,61 @@ public static class CodeValidatorService
             }
 
 
-            // 3. Rule: No direct result output (Page 1, Rule 6.2)
-            // Heuristic: Check for hardcoded result patterns without loops.
-            // Use common control structures for both C# and VB
-            string[] controlKeywords = ["for", "while", "do", "if"];
-            bool hasControlStructure = false;
+            // 3. Rule: No mixed loop types and no direct result output (Page 1, Rules 6.1 & 6.2)
+            // The test draws a loop type (for, while, do while), and they cannot be mixed.
+            bool hasFor = Regex.IsMatch(code, @"\bfor\b", RegexOptions.IgnoreCase);
+            bool hasWhile = false;
+            bool hasDo = Regex.IsMatch(code, @"\bdo\b", RegexOptions.IgnoreCase);
 
-            foreach (var keyword in controlKeywords)
+            if (extension == ".cs")
             {
-                if (Regex.IsMatch(code, $@"\b{keyword}\b", RegexOptions.IgnoreCase))
+                // In C#, while can be standalone or part of do-while.
+                // We count it as standalone if it's not preceded by '}' within a few chars (heuristic).
+                // Better: find all while and check if they are part of do-while.
+                var whileMatches = Regex.Matches(code, @"\bwhile\b", RegexOptions.IgnoreCase);
+                foreach (Match m in whileMatches)
                 {
-                    hasControlStructure = true;
-                    break;
+                    // Look backwards for 'do' that isn't closed (simplified heuristic)
+                    string before = code.Substring(0, m.Index);
+                    if (!before.TrimEnd().EndsWith("}")) 
+                    {
+                        // Check if it's potentially a standalone while(condition)
+                        if (Regex.IsMatch(before, @"\bdo\b\s*\{", RegexOptions.IgnoreCase | RegexOptions.RightToLeft))
+                        {
+                            // This while might be part of do-while. 
+                            // If we already have 'do' detected, we don't count this as a separate 'while' type.
+                        }
+                        else
+                        {
+                            hasWhile = true;
+                        }
+                    }
                 }
             }
-
-            if (!hasControlStructure)
+            else // .vb
             {
-                violations.Add(new Violation("Code Violation", "Rule 6.2: Missing control structures (loops/if). Direct output of results is suspected."));
+                // VB: 'Do While', 'Do Until', 'While', 'For'
+                hasWhile = Regex.IsMatch(code, @"\bWhile\b", RegexOptions.IgnoreCase) && !Regex.IsMatch(code, @"\bDo\s+While\b", RegexOptions.IgnoreCase);
+                // Note: VB 'While' is distinct from 'Do While'
+            }
+
+            var usedLoops = new List<string>();
+            if (hasFor) usedLoops.Add("for");
+            if (hasWhile) usedLoops.Add("while");
+            if (hasDo) usedLoops.Add("do");
+
+            // Check against expected loop type
+            if (usedLoops.Count > 0)
+            {
+                bool onlyExpected = usedLoops.All(l => l == expectedLoopType);
+                if (!onlyExpected || usedLoops.Count > 1)
+                {
+                    violations.Add(new Violation("Code Violation", $"Rule Violation: Mixed or incorrect loop type detected. The drawn type is '{expectedLoopType}', but you used: {string.Join(", ", usedLoops)}."));
+                }
+            }
+            else
+            {
+                violations.Add(new Violation("Code Violation", $"Rule 6.2: Missing required loop control structures. Expected a '{expectedLoopType}' loop. Direct output of results is prohibited."));
             }
 
         }

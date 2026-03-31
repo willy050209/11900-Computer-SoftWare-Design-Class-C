@@ -3,10 +3,11 @@
 Console.WriteLine("=== Level C Computer Software Design: Task 1 Automation Tester ===");
 
 // 1. Argument Parsing
-if (args.Length < 6)
+if (args.Length < 7)
 {
-    Console.WriteLine("Usage: dotnet run -- <code_path> <user_pdf_path> <ans_pdf_path> <name> <test_no> <seat_no>");
-    Console.WriteLine("Example: dotnet run -- \"../Task1/Program.cs\" \"../Task1/output.pdf\" \"../../ans.pdf\" \"王小明\" \"112590001\" \"001\"");
+    Console.WriteLine("Usage: dotnet run -- <code_path> <user_pdf_path> <ans_pdf_path> <name> <test_no> <seat_no> <loop_type>");
+    Console.WriteLine("Valid loop types: 'for', 'while', 'do'");
+    Console.WriteLine("Example: dotnet run -- \"../Task1/Program.cs\" \"../Task1/output.pdf\" \"../../ans.pdf\" \"王小明\" \"112590001\" \"001\" \"for\"");
     return;
 }
 
@@ -16,6 +17,13 @@ var ansPdfPath = args[2];
 var name = args[3];
 var testNo = args[4];
 var seatNo = args[5];
+var loopType = args[6].ToLowerInvariant();
+
+if (loopType != "for" && loopType != "while" && loopType != "do")
+{
+    Console.WriteLine("Invalid loop type. Must be 'for', 'while', or 'do'.");
+    return;
+}
 
 var expectedHeader = new HeaderInfo(name, testNo, seatNo);
 
@@ -24,7 +32,7 @@ var violations = new List<Violation>();
 
 // Code Validation
 Console.WriteLine("\n[1/3] Validating Code Integrity...");
-var codeResult = CodeValidatorService.Validate(codePath);
+var codeResult = CodeValidatorService.Validate(codePath, loopType);
 violations.AddRange(codeResult.Violations);
 
 // PDF Header Validation
