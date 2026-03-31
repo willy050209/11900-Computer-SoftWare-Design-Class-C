@@ -4,7 +4,7 @@
  * */
 
 
-var name = "陳宇威";
+var name = "姓名：陳宇威";
 var no = "術科測試編號：112590005";
 var id = "座號：005";
 var date = $"日期：{DateTime.Now.Year - 1911}/{DateTime.Now:MM/dd}";
