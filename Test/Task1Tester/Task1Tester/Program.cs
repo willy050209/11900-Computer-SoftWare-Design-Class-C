@@ -6,7 +6,7 @@ Console.WriteLine("=== Level C Computer Software Design: Task 1 Automation Teste
 if (args.Length < 7)
 {
     Console.WriteLine("Usage: dotnet run -- <code_path> <user_pdf_path> <ans_pdf_path> <name> <test_no> <seat_no> <loop_type>");
-    Console.WriteLine("Valid loop types: 'for', 'while', 'do'");
+    Console.WriteLine("Valid loop types: 'for', 'while', or 'do'");
     Console.WriteLine("Example: dotnet run -- \"../Task1/Program.cs\" \"../Task1/output.pdf\" \"../../ans.pdf\" \"王小明\" \"112590001\" \"001\" \"for\"");
     return;
 }
