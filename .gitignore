@@ -1,0 +1,22 @@
+# .NET
+[Bb]in/
+[Oo]bj/
+*.exe
+*.dll
+*.pdb
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+.vscode/
+
+# Project Specific
+*.SM
+*.pdf
+!ans.pdf
+!119003B14.pdf
+
+# Temporary files
+.gemini/
+*.tmp

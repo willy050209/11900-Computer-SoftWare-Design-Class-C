@@ -1,0 +1,14 @@
+// filepath: GlobalUsings.cs
+global using System;
+global using System.Collections.Generic;
+global using System.Collections.Immutable;
+global using System.IO;
+global using System.Linq;
+global using System.Text;
+global using System.Text.RegularExpressions;
+global using System.Threading.Tasks;
+global using iText.Kernel.Pdf;
+global using iText.Kernel.Pdf.Canvas.Parser;
+global using iText.Kernel.Pdf.Canvas.Parser.Listener;
+global using Task1Tester.Models;
+global using Task1Tester.Services;
