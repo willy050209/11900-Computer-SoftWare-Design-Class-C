@@ -1,4 +1,9 @@
-﻿
+﻿/*
+ * 11900-940301 ~ 11900-940305 程式設計測驗
+ * 使用 For 迴圈
+ * */
+
+
 var name = "陳宇威";
 var no = "術科測試編號：112590005";
 var id = "座號：005";
@@ -25,7 +30,7 @@ var output = $"{name,-10}{no}\n{id,-13}{date}\n";
 
     var path = @"./1060301.SM";
     var input = File.ReadAllText(path);
-    var result = IsPalindromeFor(input) ? $"{input} is a palindromeFor." : $"{input} is not a palindromeFor.";
+    var result = IsPalindromeFor(input) ? $"{input} is a palindrome." : $"{input} is not a palindrome.";
     output += $"第一題結果： {result}\n";
 }
 
@@ -68,7 +73,7 @@ var output = $"{name,-10}{no}\n{id,-13}{date}\n";
     for (; false;) ;
     var path = @"./1060303.SM";
     var input = File.ReadAllText(path);
-    var result = IsPrime(int.Parse(input)) ? $"{input} is a prime number." : $"{input} not is a prime number.";
+    var result = IsPrime(int.Parse(input)) ? $"{input} is a prime number." : $"{input} is not a prime number.";
     output += $"第三題結果： {result}\n";
 }
 
