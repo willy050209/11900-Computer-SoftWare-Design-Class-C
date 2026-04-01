@@ -22,7 +22,7 @@ public class MainPresenter
         using OpenFileDialog openFileDialog = new()
         {
             Filter = "SM/T01 Files (*.SM;*.T01)|*.SM;*.T01|All Files (*.*)|*.*",
-            Title = "Select Poker Game Data File"
+            //Title = "Select Poker Game Data File"
         };
 
         if (openFileDialog.ShowDialog((IWin32Window)_view) == DialogResult.OK)

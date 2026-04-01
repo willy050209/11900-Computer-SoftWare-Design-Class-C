@@ -31,16 +31,34 @@ public class Task06UITest : IDisposable
     [Fact]
     public void TestTask06_FullFlow()
     {
-        Thread.Sleep(2000);
-        var window = _app.GetMainWindow(_automation, TimeSpan.FromSeconds(15));
-
-        Assert.NotNull(window);
-        var page = new MainFormPage(window);
-        page.HandleOpenFileDialog(_testFilePath);
+        // 1. 等待對話框出現
+        var dialogElement = FlaUI.Core.Tools.Retry.WhileNull(() => 
+        {
+            return _automation.GetDesktop().FindAllChildren(cf => cf.ByProcessId(_app.ProcessId))
+                   .FirstOrDefault(w => w.ClassName == "#32770");
+        }, TimeSpan.FromSeconds(20)).Result;
         
-        Thread.Sleep(2000); 
-        Assert.Equal("陳宇威", page.NameTextBox.Text);
-        Assert.True(page.ResultsGrid.Rows.Length > 0);
+        Assert.NotNull(dialogElement);
+        var dialogPage = new MainFormPage(dialogElement.AsWindow());
+        
+        // 2. 處理檔案對話框
+        dialogPage.HandleOpenFileDialog(_testFilePath);
+        
+        // 3. 對話框處理完後，主視窗應該會出現
+        Thread.Sleep(3000);
+        var mainWin = FlaUI.Core.Tools.Retry.WhileNull(() => 
+        {
+            return _automation.GetDesktop().FindAllChildren(cf => cf.ByProcessId(_app.ProcessId))
+                   .FirstOrDefault(w => w.ClassName != "#32770" && !string.IsNullOrEmpty(w.Name));
+        }, TimeSpan.FromSeconds(15)).Result;
+
+        Assert.NotNull(mainWin);
+        var mainPage = new MainFormPage(mainWin.AsWindow());
+
+        // 4. 驗證資料
+        Thread.Sleep(5000); 
+        Assert.Equal("陳宇威", mainPage.NameTextBox.Text);
+        Assert.True(mainPage.ResultsGrid.Rows.Length > 0, "身分證檢查應該有結果資料");
     }
 
     public void Dispose()

@@ -24,7 +24,7 @@ public class MainPresenter
         using OpenFileDialog openFileDialog = new()
         {
             Filter = "SM/T01 Files (*.SM;*.T01)|*.SM;*.T01|All Files (*.*)|*.*",
-            Title = "Select Fraction Data File"
+            // Title = "Select Fraction Data File"
         };
 
         if (openFileDialog.ShowDialog((IWin32Window)_view) == DialogResult.OK)

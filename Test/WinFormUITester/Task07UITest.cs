@@ -31,24 +31,34 @@ public class Task07UITest : IDisposable
     [Fact]
     public void TestTask07_PokerGameFlow()
     {
-        // 先給予一點啟動緩衝，避免 UIA 鎖死
-        Thread.Sleep(2000);
+        // 1. 等待對話框出現
+        var dialogElement = FlaUI.Core.Tools.Retry.WhileNull(() => 
+        {
+            return _automation.GetDesktop().FindAllChildren(cf => cf.ByProcessId(_app.ProcessId))
+                   .FirstOrDefault(w => w.ClassName == "#32770");
+        }, TimeSpan.FromSeconds(20)).Result;
+        
+        Assert.NotNull(dialogElement);
+        var dialogPage = new MainFormPage(dialogElement.AsWindow());
+        
+        // 2. 處理檔案對話框
+        dialogPage.HandleOpenFileDialog(_testFilePath);
+        
+        // 3. 對話框處理完後，主視窗應該會出現
+        Thread.Sleep(3000);
+        var mainWin = FlaUI.Core.Tools.Retry.WhileNull(() => 
+        {
+            return _automation.GetDesktop().FindAllChildren(cf => cf.ByProcessId(_app.ProcessId))
+                   .FirstOrDefault(w => w.ClassName != "#32770" && !string.IsNullOrEmpty(w.Name));
+        }, TimeSpan.FromSeconds(15)).Result;
 
-        // 使用較輕量的 GetMainWindow，這在對話框阻塞時較不易超時
-        var window = _app.GetMainWindow(_automation, TimeSpan.FromSeconds(15));
+        Assert.NotNull(mainWin);
+        var mainPage = new MainFormPage(mainWin.AsWindow());
 
-        Assert.NotNull(window);
-        var page = new MainFormPage(window);
-
-        // 1. 處理檔案對話框
-        page.HandleOpenFileDialog(_testFilePath);
-
-        // 2. 驗證基本資料
-        Thread.Sleep(2000); 
-        Assert.Equal("陳宇威", page.NameTextBox.Text);
-
-        // 3. 驗證 DataGridView 內容 (撲克牌)
-        var grid = page.ResultsGrid;
+        // 4. 驗證資料
+        Thread.Sleep(5000); 
+        Assert.Equal("陳宇威", mainPage.NameTextBox.Text);
+        var grid = mainPage.ResultsGrid;
         Assert.True(grid.Rows.Length > 0, "撲克牌比大小應該有回合資料");
 
         // 隨機檢查一筆資料是否包含撲克牌符號 (♠, ♥, ♦, ♣)

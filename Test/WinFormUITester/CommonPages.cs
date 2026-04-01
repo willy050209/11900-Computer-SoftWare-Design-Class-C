@@ -41,23 +41,68 @@ public class MainFormPage
 
     public void HandleOpenFileDialog(string filePath)
     {
-        // 等待對話框出現，最多 8 秒
-        var retryResult = FlaUI.Core.Tools.Retry.WhileNull(() => 
-            _window.ModalWindows.FirstOrDefault(w => w.ClassName == "#32770" || w.Name.Contains("Open") || w.Name.Contains("開啟")),
-            TimeSpan.FromSeconds(8));
-
-        if (retryResult.Success && retryResult.Result != null)
+        Console.WriteLine($"Starting HandleOpenFileDialog for: {filePath}");
+        
+        // 1. 等待對話框出現
+        var dialog = FlaUI.Core.Tools.Retry.WhileNull(() => 
         {
-            var dialog = retryResult.Result;
-            // 找到輸入框
-            var edit = dialog.FindFirstDescendant(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Edit)).AsTextBox();
-            edit.Enter(filePath);
-            Thread.Sleep(500);
+            return _window.ClassName == "#32770" ? _window : _window.ModalWindows.FirstOrDefault(w => w.ClassName == "#32770");
+        }, TimeSpan.FromSeconds(10)).Result;
 
-            // 優先尋找並點擊「開啟」或 "Open" 按鈕，這比按 Enter 穩定
-            var openBtn = dialog.FindFirstDescendant(cf => cf.ByName("開啟"))?.AsButton() 
-                       ?? dialog.FindFirstDescendant(cf => cf.ByName("Open"))?.AsButton();
-            
+        if (dialog == null) 
+        {
+            // 嘗試從桌面找
+            dialog = FlaUI.Core.AutomationElements.AutomationElementExtensions.AsWindow(
+                _window.Automation.GetDesktop().FindFirstChild(cf => cf.ByClassName("#32770")));
+        }
+
+        if (dialog == null) return;
+
+        dialog.Focus();
+        Thread.Sleep(1000);
+
+        // 2. 使用 Alt+N 強制聚焦到檔名輸入框
+        dialog.Focus();
+        FlaUI.Core.Input.Keyboard.Press(FlaUI.Core.WindowsAPI.VirtualKeyShort.ALT);
+        FlaUI.Core.Input.Keyboard.Press(FlaUI.Core.WindowsAPI.VirtualKeyShort.KEY_N);
+        FlaUI.Core.Input.Keyboard.Release(FlaUI.Core.WindowsAPI.VirtualKeyShort.ALT);
+        Thread.Sleep(500);
+
+        // 3. 獲取當前聚焦的控制項 (應該是輸入框)
+        var edit = dialog.Automation.FocusedElement()?.AsTextBox();
+        
+        // 如果沒抓到，嘗試用 ID 找 (1148 是標準檔名編輯框 ID)
+        if (edit == null || edit.ClassName != "Edit")
+        {
+            edit = dialog.FindFirstDescendant(cf => cf.ByAutomationId("1148"))?.AsTextBox();
+        }
+
+        if (edit != null)
+        {
+            edit.Focus();
+            // 嘗試直接設定值
+            try 
+            {
+                if (edit.Patterns.Value.IsSupported)
+                {
+                    edit.Patterns.Value.Pattern.SetValue(filePath);
+                }
+                else
+                {
+                    edit.Text = filePath;
+                }
+            }
+            catch
+            {
+                // 如果設定失敗，使用模擬打字，但先清空
+                edit.Enter(filePath);
+            }
+            Thread.Sleep(1000);
+
+            // 4. 點擊「開啟」
+            var openBtn = dialog.FindFirstDescendant(cf => cf.ByAutomationId("1").And(cf.ByControlType(FlaUI.Core.Definitions.ControlType.Button)))?.AsButton()
+                       ?? dialog.FindFirstDescendant(cf => cf.ByName("開啟"))?.AsButton();
+
             if (openBtn != null)
             {
                 openBtn.Invoke();
@@ -66,9 +111,15 @@ public class MainFormPage
             {
                 FlaUI.Core.Input.Keyboard.Press(FlaUI.Core.WindowsAPI.VirtualKeyShort.ENTER);
             }
-            
-            FlaUI.Core.Input.Wait.UntilInputIsProcessed();
-            Thread.Sleep(1000); // 給予一點緩衝時間讓對話框完全消失
         }
+        else
+        {
+            // 最終手段：直接打字
+            FlaUI.Core.Input.Keyboard.Type(filePath);
+            Thread.Sleep(500);
+            FlaUI.Core.Input.Keyboard.Press(FlaUI.Core.WindowsAPI.VirtualKeyShort.ENTER);
+        }
+        
+        Thread.Sleep(3000); 
     }
 }

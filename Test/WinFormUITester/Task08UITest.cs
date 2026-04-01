@@ -31,30 +31,43 @@ public class Task08UITest : IDisposable
     [Fact]
     public void TestTask08_FractionArithmeticFlow()
     {
-        Thread.Sleep(2000);
-        var window = _app.GetMainWindow(_automation, TimeSpan.FromSeconds(15));
-
-        Assert.NotNull(window);
-        var page = new MainFormPage(window);
-
-        // 1. 處理檔案對話框
-        page.HandleOpenFileDialog(_testFilePath);
+        // 1. 等待對話框出現
+        var dialogElement = FlaUI.Core.Tools.Retry.WhileNull(() => 
+        {
+            return _automation.GetDesktop().FindAllChildren(cf => cf.ByProcessId(_app.ProcessId))
+                   .FirstOrDefault(w => w.ClassName == "#32770");
+        }, TimeSpan.FromSeconds(20)).Result;
         
-        // 2. 驗證基本資料
-        Thread.Sleep(2000); 
-        Assert.Equal("陳宇威", page.NameTextBox.Text);
+        Assert.NotNull(dialogElement);
+        var dialogPage = new MainFormPage(dialogElement.AsWindow());
+        
+        // 2. 處理檔案對話框
+        dialogPage.HandleOpenFileDialog(_testFilePath);
+        
+        // 3. 對話框處理完後，主視窗應該會出現
+        Thread.Sleep(3000);
+        var mainWin = FlaUI.Core.Tools.Retry.WhileNull(() => 
+        {
+            return _automation.GetDesktop().FindAllChildren(cf => cf.ByProcessId(_app.ProcessId))
+                   .FirstOrDefault(w => w.ClassName != "#32770" && !string.IsNullOrEmpty(w.Name));
+        }, TimeSpan.FromSeconds(15)).Result;
 
-        // 3. 驗證 DataGridView 內容 (分數運算結果)
-        var grid = page.ResultsGrid;
+        Assert.NotNull(mainWin);
+        var mainPage = new MainFormPage(mainWin.AsWindow());
+
+        // 4. 驗證資料
+        Thread.Sleep(5000); 
+        Assert.Equal("陳宇威", mainPage.NameTextBox.Text);
+        var grid = mainPage.ResultsGrid;
         Assert.True(grid.Rows.Length > 0, "分數運算應該有結果資料");
 
         // 驗證第一筆運算結果是否包含分數格式或整數
-        // 1060308.SM 的內容範例通常是 a,b,op,c,d
         var firstAnswer = grid.Rows[0].Cells[3].Value;
         Assert.NotEmpty(firstAnswer);
         // 檢查是否符合整數或分數格式 (例如 "1", "1/2", "-3/4")
         Assert.Matches(@"^-?\d+(/\d+)?$", firstAnswer);
     }
+
 
     public void Dispose()
     {
