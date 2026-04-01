@@ -113,8 +113,8 @@ partial class MainForm
         lblTestDate.Name = "lblTestDate";
         lblTestDate.Size = new Size(129, 38);
         lblTestDate.TabIndex = 6;
-        lblTestDate.Text = "考試日期";
-        lblTestDate.TextAlign = ContentAlignment.MiddleRight;
+        lblTestDate.Text = "考 試 日 期";
+        lblTestDate.TextAlign = ContentAlignment.MiddleCenter;
         // 
         // txtDate
         // 
@@ -143,28 +143,24 @@ partial class MainForm
         colId.HeaderText = "ID_NO";
         colId.MinimumWidth = 8;
         colId.Name = "colId";
-        colId.Width = 150;
         // 
         // colName
         // 
         colName.HeaderText = "NAME";
         colName.MinimumWidth = 8;
         colName.Name = "colName";
-        colName.Width = 150;
         // 
         // colSex
         // 
         colSex.HeaderText = "SEX";
         colSex.MinimumWidth = 8;
         colSex.Name = "colSex";
-        colSex.Width = 80;
         // 
         // colError
         // 
         colError.HeaderText = "ERROR";
         colError.MinimumWidth = 8;
         colError.Name = "colError";
-        colError.Width = 300;
         // 
         // MainForm
         // 

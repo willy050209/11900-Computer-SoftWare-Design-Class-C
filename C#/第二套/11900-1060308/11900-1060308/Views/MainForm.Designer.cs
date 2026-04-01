@@ -1,4 +1,4 @@
-namespace FractionArithmetic.Views;
+﻿namespace FractionArithmetic.Views;
 
 partial class MainForm
 {
@@ -15,102 +15,167 @@ partial class MainForm
 
     private void InitializeComponent()
     {
-        this.grpCandidate = new GroupBox();
-        this.lblCandidateName = new Label();
-        this.txtName = new TextBox();
-        this.lblCandidateNumber = new Label();
-        this.txtNumber = new TextBox();
-        this.lblDeskNumber = new Label();
-        this.txtDesk = new TextBox();
-        this.lblTestDate = new Label();
-        this.txtDate = new TextBox();
-        this.dgvResults = new DataGridView();
-        this.colValue1 = new DataGridViewTextBoxColumn();
-        this.colOp = new DataGridViewTextBoxColumn();
-        this.colValue2 = new DataGridViewTextBoxColumn();
-        this.colAnswer = new DataGridViewTextBoxColumn();
-
-        this.grpCandidate.SuspendLayout();
-        ((System.ComponentModel.ISupportInitialize)(this.dgvResults)).BeginInit();
-        this.SuspendLayout();
-
+        grpCandidate = new GroupBox();
+        lblCandidateName = new Label();
+        txtName = new TextBox();
+        lblCandidateNumber = new Label();
+        txtNumber = new TextBox();
+        lblDeskNumber = new Label();
+        txtDesk = new TextBox();
+        lblTestDate = new Label();
+        txtDate = new TextBox();
+        dgvResults = new DataGridView();
+        colValue1 = new DataGridViewTextBoxColumn();
+        colOp = new DataGridViewTextBoxColumn();
+        colValue2 = new DataGridViewTextBoxColumn();
+        colAnswer = new DataGridViewTextBoxColumn();
+        grpCandidate.SuspendLayout();
+        ((System.ComponentModel.ISupportInitialize)dgvResults).BeginInit();
+        SuspendLayout();
+        // 
         // grpCandidate
-        this.grpCandidate.Controls.Add(this.lblCandidateName);
-        this.grpCandidate.Controls.Add(this.txtName);
-        this.grpCandidate.Controls.Add(this.lblCandidateNumber);
-        this.grpCandidate.Controls.Add(this.txtNumber);
-        this.grpCandidate.Controls.Add(this.lblDeskNumber);
-        this.grpCandidate.Controls.Add(this.txtDesk);
-        this.grpCandidate.Controls.Add(this.lblTestDate);
-        this.grpCandidate.Controls.Add(this.txtDate);
-        this.grpCandidate.Location = new Point(12, 12);
-        this.grpCandidate.Size = new Size(623, 100);
-        this.grpCandidate.Text = "應檢人資料";
-
-        // 姓名
-        this.lblCandidateName.Text = "姓名";
-        this.lblCandidateName.Location = new Point(10, 25);
-        this.lblCandidateName.Size = new Size(40, 23);
-        this.lblCandidateName.TextAlign = ContentAlignment.MiddleRight;
-        this.txtName.Location = new Point(55, 22);
-        this.txtName.Size = new Size(100, 23);
-
-        // 術科測試編號
-        this.lblCandidateNumber.Text = "術科測試編號";
-        this.lblCandidateNumber.Location = new Point(180, 25);
-        this.lblCandidateNumber.Size = new Size(90, 23);
-        this.lblCandidateNumber.TextAlign = ContentAlignment.MiddleRight;
-        this.txtNumber.Location = new Point(275, 22);
-        this.txtNumber.Size = new Size(150, 23);
-
-        // 座號
-        this.lblDeskNumber.Text = "座號";
-        this.lblDeskNumber.Location = new Point(10, 60);
-        this.lblDeskNumber.Size = new Size(40, 23);
-        this.lblDeskNumber.TextAlign = ContentAlignment.MiddleRight;
-        this.txtDesk.Location = new Point(55, 57);
-        this.txtDesk.Size = new Size(100, 23);
-
-        // 考試日期
-        this.lblTestDate.Text = "考試日期";
-        this.lblTestDate.Location = new Point(180, 60);
-        this.lblTestDate.Size = new Size(90, 23);
-        this.lblTestDate.TextAlign = ContentAlignment.MiddleRight;
-        this.txtDate.Location = new Point(275, 57);
-        this.txtDate.Size = new Size(150, 23);
-
+        // 
+        grpCandidate.Controls.Add(lblCandidateName);
+        grpCandidate.Controls.Add(txtName);
+        grpCandidate.Controls.Add(lblCandidateNumber);
+        grpCandidate.Controls.Add(txtNumber);
+        grpCandidate.Controls.Add(lblDeskNumber);
+        grpCandidate.Controls.Add(txtDesk);
+        grpCandidate.Controls.Add(lblTestDate);
+        grpCandidate.Controls.Add(txtDate);
+        grpCandidate.Location = new Point(17, 20);
+        grpCandidate.Margin = new Padding(4, 5, 4, 5);
+        grpCandidate.Name = "grpCandidate";
+        grpCandidate.Padding = new Padding(4, 5, 4, 5);
+        grpCandidate.Size = new Size(890, 167);
+        grpCandidate.TabIndex = 0;
+        grpCandidate.TabStop = false;
+        grpCandidate.Text = "應檢人資料";
+        // 
+        // lblCandidateName
+        // 
+        lblCandidateName.Location = new Point(14, 42);
+        lblCandidateName.Margin = new Padding(4, 0, 4, 0);
+        lblCandidateName.Name = "lblCandidateName";
+        lblCandidateName.Size = new Size(57, 38);
+        lblCandidateName.TabIndex = 0;
+        lblCandidateName.Text = "姓名";
+        lblCandidateName.TextAlign = ContentAlignment.MiddleRight;
+        // 
+        // txtName
+        // 
+        txtName.Location = new Point(79, 37);
+        txtName.Margin = new Padding(4, 5, 4, 5);
+        txtName.Name = "txtName";
+        txtName.Size = new Size(141, 31);
+        txtName.TabIndex = 1;
+        // 
+        // lblCandidateNumber
+        // 
+        lblCandidateNumber.Location = new Point(257, 42);
+        lblCandidateNumber.Margin = new Padding(4, 0, 4, 0);
+        lblCandidateNumber.Name = "lblCandidateNumber";
+        lblCandidateNumber.Size = new Size(129, 38);
+        lblCandidateNumber.TabIndex = 2;
+        lblCandidateNumber.Text = "術科測試編號";
+        lblCandidateNumber.TextAlign = ContentAlignment.MiddleRight;
+        // 
+        // txtNumber
+        // 
+        txtNumber.Location = new Point(393, 37);
+        txtNumber.Margin = new Padding(4, 5, 4, 5);
+        txtNumber.Name = "txtNumber";
+        txtNumber.Size = new Size(213, 31);
+        txtNumber.TabIndex = 3;
+        // 
+        // lblDeskNumber
+        // 
+        lblDeskNumber.Location = new Point(14, 100);
+        lblDeskNumber.Margin = new Padding(4, 0, 4, 0);
+        lblDeskNumber.Name = "lblDeskNumber";
+        lblDeskNumber.Size = new Size(57, 38);
+        lblDeskNumber.TabIndex = 4;
+        lblDeskNumber.Text = "座號";
+        lblDeskNumber.TextAlign = ContentAlignment.MiddleRight;
+        // 
+        // txtDesk
+        // 
+        txtDesk.Location = new Point(79, 95);
+        txtDesk.Margin = new Padding(4, 5, 4, 5);
+        txtDesk.Name = "txtDesk";
+        txtDesk.Size = new Size(141, 31);
+        txtDesk.TabIndex = 5;
+        // 
+        // lblTestDate
+        // 
+        lblTestDate.Location = new Point(257, 100);
+        lblTestDate.Margin = new Padding(4, 0, 4, 0);
+        lblTestDate.Name = "lblTestDate";
+        lblTestDate.Size = new Size(129, 38);
+        lblTestDate.TabIndex = 6;
+        lblTestDate.Text = "考 試 日 期";
+        lblTestDate.TextAlign = ContentAlignment.MiddleRight;
+        // 
+        // txtDate
+        // 
+        txtDate.Location = new Point(393, 95);
+        txtDate.Margin = new Padding(4, 5, 4, 5);
+        txtDate.Name = "txtDate";
+        txtDate.Size = new Size(213, 31);
+        txtDate.TabIndex = 7;
+        // 
         // dgvResults
-        this.dgvResults.AllowUserToAddRows = false;
-        this.dgvResults.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-        this.dgvResults.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-        this.dgvResults.Columns.AddRange(new DataGridViewColumn[] { this.colValue1, this.colOp, this.colValue2, this.colAnswer });
-        this.dgvResults.Location = new Point(12, 120);
-        this.dgvResults.Size = new Size(623, 330);
-        this.dgvResults.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-
-        this.colValue1.HeaderText = "VALUE1";
-        this.colValue1.Width = 150;
-        this.colOp.HeaderText = "OP";
-        this.colOp.Width = 80;
-        this.colValue2.HeaderText = "VALUE2";
-        this.colValue2.Width = 150;
-        this.colAnswer.HeaderText = "ANSWER";
-        this.colAnswer.Width = 200;
-
+        // 
+        dgvResults.AllowUserToAddRows = false;
+        dgvResults.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+        dgvResults.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+        dgvResults.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+        dgvResults.Columns.AddRange(new DataGridViewColumn[] { colValue1, colOp, colValue2, colAnswer });
+        dgvResults.Location = new Point(17, 200);
+        dgvResults.Margin = new Padding(4, 5, 4, 5);
+        dgvResults.Name = "dgvResults";
+        dgvResults.RowHeadersWidth = 62;
+        dgvResults.Size = new Size(651, 550);
+        dgvResults.TabIndex = 1;
+        // 
+        // colValue1
+        // 
+        colValue1.HeaderText = "VALUE1";
+        colValue1.MinimumWidth = 8;
+        colValue1.Name = "colValue1";
+        // 
+        // colOp
+        // 
+        colOp.HeaderText = "OP";
+        colOp.MinimumWidth = 8;
+        colOp.Name = "colOp";
+        // 
+        // colValue2
+        // 
+        colValue2.HeaderText = "VALUE2";
+        colValue2.MinimumWidth = 8;
+        colValue2.Name = "colValue2";
+        // 
+        // colAnswer
+        // 
+        colAnswer.HeaderText = "ANSWER";
+        colAnswer.MinimumWidth = 8;
+        colAnswer.Name = "colAnswer";
+        // 
         // MainForm
-        this.AutoScaleDimensions = new SizeF(7F, 15F);
-        this.AutoScaleMode = AutoScaleMode.Font;
-        this.ClientSize = new Size(647, 461);
-        this.Controls.Add(this.grpCandidate);
-        this.Controls.Add(this.dgvResults);
-        this.Text = "求分數的加、減、乘、除運算";
-        this.grpCandidate.ResumeLayout(false);
-        this.grpCandidate.PerformLayout();
-        ((System.ComponentModel.ISupportInitialize)(this.dgvResults)).EndInit();
-        this.ResumeLayout(false);
-        
-        // 確保 GroupBox 在最上層
-        this.grpCandidate.BringToFront();
+        // 
+        AutoScaleDimensions = new SizeF(10F, 25F);
+        AutoScaleMode = AutoScaleMode.Font;
+        ClientSize = new Size(685, 768);
+        Controls.Add(grpCandidate);
+        Controls.Add(dgvResults);
+        Margin = new Padding(4, 5, 4, 5);
+        Name = "MainForm";
+        Text = "求分數的加、減、乘、除運算";
+        grpCandidate.ResumeLayout(false);
+        grpCandidate.PerformLayout();
+        ((System.ComponentModel.ISupportInitialize)dgvResults).EndInit();
+        ResumeLayout(false);
     }
 
     private GroupBox grpCandidate;

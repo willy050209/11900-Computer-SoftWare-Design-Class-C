@@ -1,4 +1,4 @@
-namespace PokerGame.Views;
+﻿namespace PokerGame.Views;
 
 using PokerGame.Models;
 using System.Windows.Forms;

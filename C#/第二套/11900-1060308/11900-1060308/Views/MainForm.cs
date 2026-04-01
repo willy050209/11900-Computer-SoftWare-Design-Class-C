@@ -1,4 +1,4 @@
-namespace FractionArithmetic.Views;
+﻿namespace FractionArithmetic.Views;
 
 using FractionArithmetic.Models;
 using System.Windows.Forms;
