@@ -55,8 +55,12 @@ public class Task07UITest : IDisposable
         Assert.NotNull(mainWin);
         var mainPage = new MainFormPage(mainWin.AsWindow());
 
-        // 4. 驗證資料
+        // 4. 驗證資料與 UI
         Thread.Sleep(5000); 
+        
+        // 驗證 UI 佈局
+        mainPage.VerifyUILayout("撲克牌比大小", new[] { "序號", "玩家", "莊家", "結果" });
+
         Assert.Equal("陳宇威", mainPage.NameTextBox.Text);
         var grid = mainPage.ResultsGrid;
         Assert.True(grid.Rows.Length > 0, "撲克牌比大小應該有回合資料");

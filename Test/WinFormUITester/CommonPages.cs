@@ -39,6 +39,51 @@ public class MainFormPage
         throw new NotSupportedException($"不支援的控制項型別: {typeof(T).Name}");
     }
 
+    public void VerifyUILayout(string expectedTitle, string[] expectedColumns)
+    {
+        // 1. 驗證視窗標題
+        if (_window.Title != expectedTitle)
+        {
+            throw new Exception($"視窗標題不符。預期: '{expectedTitle}', 實際: '{_window.Title}'");
+        }
+
+        // 2. 驗證群組框標題
+        var groupBox = _window.FindFirstDescendant(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Group));
+        if (groupBox == null || groupBox.Name != "應檢人資料")
+        {
+            throw new Exception($"找不到標題為 '應檢人資料' 的群組框，或標題不符。實際: '{groupBox?.Name}'");
+        }
+
+        // 3. 驗證應檢人資料標籤
+        var labels = _window.FindAllDescendants(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Text))
+                            .Select(x => x.Name).ToList();
+        
+        string[] requiredLabels = { "姓名", "術科測試編號", "座號", "考 試 日 期" };
+        foreach (var reqLabel in requiredLabels)
+        {
+            if (!labels.Contains(reqLabel))
+            {
+                throw new Exception($"找不到必要的標籤: '{reqLabel}'");
+            }
+        }
+
+        // 4. 驗證 DataGridView 欄位標題
+        var header = ResultsGrid.FindFirstChild(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Header));
+        if (header != null)
+        {
+            var headerItems = header.FindAllChildren(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.HeaderItem))
+                                    .Select(x => x.Name).Where(name => !string.IsNullOrWhiteSpace(name) && name != "Top Left Header Cell").ToList();
+            
+            for (int i = 0; i < expectedColumns.Length; i++)
+            {
+                if (i >= headerItems.Count || headerItems[i] != expectedColumns[i])
+                {
+                    throw new Exception($"DataGridView 欄位不符。預期第 {i} 欄為 '{expectedColumns[i]}'，實際為 '{(i < headerItems.Count ? headerItems[i] : "null")}'");
+                }
+            }
+        }
+    }
+
     public void HandleOpenFileDialog(string filePath)
     {
         Console.WriteLine($"Starting HandleOpenFileDialog for: {filePath}");

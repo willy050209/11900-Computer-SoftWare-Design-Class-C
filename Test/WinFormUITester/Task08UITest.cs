@@ -55,8 +55,12 @@ public class Task08UITest : IDisposable
         Assert.NotNull(mainWin);
         var mainPage = new MainFormPage(mainWin.AsWindow());
 
-        // 4. 驗證資料
+        // 4. 驗證資料與 UI
         Thread.Sleep(5000); 
+        
+        // 驗證 UI 佈局
+        mainPage.VerifyUILayout("分數加、減、乘、除運算", new[] { "VALUE1", "OP", "VALUE2", "ANSWER" });
+
         Assert.Equal("陳宇威", mainPage.NameTextBox.Text);
         var grid = mainPage.ResultsGrid;
         Assert.True(grid.Rows.Length > 0, "分數運算應該有結果資料");
