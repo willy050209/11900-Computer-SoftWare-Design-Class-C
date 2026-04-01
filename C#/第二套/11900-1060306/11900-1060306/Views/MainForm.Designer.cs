@@ -135,7 +135,7 @@ partial class MainForm
         dgvResults.Margin = new Padding(4, 5, 4, 5);
         dgvResults.Name = "dgvResults";
         dgvResults.RowHeadersWidth = 62;
-        dgvResults.Size = new Size(742, 383);
+        dgvResults.Size = new Size(742, 480);
         dgvResults.TabIndex = 1;
         // 
         // colId
@@ -166,7 +166,7 @@ partial class MainForm
         // 
         AutoScaleDimensions = new SizeF(10F, 25F);
         AutoScaleMode = AutoScaleMode.Font;
-        ClientSize = new Size(776, 601);
+        ClientSize = new Size(776, 700);
         Controls.Add(grpCandidate);
         Controls.Add(dgvResults);
         Margin = new Padding(4, 5, 4, 5);
