@@ -39,7 +39,10 @@ public partial class MainForm : Form, IMainView
         dgvResults.Rows.Clear();
         foreach (var record in records)
         {
-            dgvResults.Rows.Add(record.Id, record.Name, record.Sex, record.Error);
+            if (record != null)
+            {
+                dgvResults.Rows.Add(record.Id, record.Name, record.Sex, record.Error);
+            }
         }
     }
 }
