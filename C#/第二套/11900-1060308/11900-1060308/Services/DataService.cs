@@ -17,7 +17,7 @@ public class DataService : IDataService
         var lines = await File.ReadAllLinesAsync(filePath);
         return lines
             .Where(line => !string.IsNullOrWhiteSpace(line))
-            .Select(line =>
+            .SelectMany(line =>
             {
                 var parts = line.Split(',', StringSplitOptions.TrimEntries);
                 if (parts.Length >= 5)
@@ -27,11 +27,10 @@ public class DataService : IDataService
                         long.TryParse(parts[3], out long n2) &&
                         long.TryParse(parts[4], out long d2))
                     {
-                        return (new Fraction(n1, d1), parts[2], new Fraction(n2, d2));
+                        return [(new Fraction(n1, d1), parts[2], new Fraction(n2, d2))];
                     }
                 }
-                return default;
-            })
-            .Where(x => x != default);
+                return Enumerable.Empty<(Fraction, string, Fraction)>();
+            });
     }
 }

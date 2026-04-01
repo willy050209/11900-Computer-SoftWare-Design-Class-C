@@ -24,7 +24,7 @@ public static class PdfValidatorService
             var text = PdfTextExtractor.GetTextFromPage(firstPage, new SimpleTextExtractionStrategy());
 
             // Normalize spaces for comparison
-            string normalizedText = NormalizeForCompare(text);
+            string normalizedText = NormalizeForCompare(text ?? string.Empty);
 
             // Page 10 specified header fields: 姓名, 術科測試編號, 座號, 日期
             CheckRequirement(normalizedText, $"姓名：{expected.Name}", "Name", violations);

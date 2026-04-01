@@ -20,15 +20,14 @@ public class DataService : IDataService
         var lines = await File.ReadAllLinesAsync(filePath);
         return lines
             .Where(line => !string.IsNullOrWhiteSpace(line))
-            .Select(line =>
+            .SelectMany(line =>
             {
                 var parts = line.Split(',', StringSplitOptions.TrimEntries);
                 if (parts.Length >= 3)
                 {
-                    return new IdCardRecord(parts[0], parts[1], parts[2]);
+                    return [new IdCardRecord(parts[0], parts[1], parts[2])];
                 }
-                return null;
-            })
-            .Where(r => r != null)!;
+                return Enumerable.Empty<IdCardRecord>();
+            });
     }
 }

@@ -17,7 +17,7 @@ public static class CodeValidatorService
                 return (false, violations);
             }
 
-            var extension = Path.GetExtension(codePath).ToLowerInvariant();
+            var extension = (Path.GetExtension(codePath) ?? string.Empty).ToLowerInvariant();
             if (extension != ".cs" && extension != ".vb")
             {
                 violations.Add(new Violation("System Error", $"Unsupported code file extension: {extension}. Only .cs and .vb are supported."));

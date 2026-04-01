@@ -1,4 +1,4 @@
-namespace IdCardChecker.Services;
+﻿namespace IdCardChecker.Services;
 
 using IdCardChecker.Models;
 using System.Text.RegularExpressions;
@@ -54,9 +54,9 @@ public class IdCardValidatorService : IIdCardValidatorService
     {
         if (id.Length != 10) return false;
         if (!char.IsAsciiLetterUpper(id[0])) return false;
-        for (int i = 1; i < 10; i++)
+        foreach(var c in id[1..])
         {
-            if (!char.IsDigit(id[i])) return false;
+            if (!char.IsDigit(c)) return false;
         }
         return true;
     }

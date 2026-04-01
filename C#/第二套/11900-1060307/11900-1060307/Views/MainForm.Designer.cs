@@ -44,13 +44,14 @@ partial class MainForm
         this.grpCandidate.Controls.Add(this.lblTestDate);
         this.grpCandidate.Controls.Add(this.txtDate);
         this.grpCandidate.Location = new Point(12, 12);
-        this.grpCandidate.Size = new Size(760, 100);
+        this.grpCandidate.Size = new Size(743, 100);
         this.grpCandidate.Text = "應檢人資料";
 
         // 姓名
         this.lblCandidateName.Text = "姓名";
         this.lblCandidateName.Location = new Point(10, 25);
         this.lblCandidateName.Size = new Size(40, 23);
+        this.lblCandidateName.TextAlign = ContentAlignment.MiddleRight;
         this.txtName.Location = new Point(55, 22);
         this.txtName.Size = new Size(100, 23);
 
@@ -58,6 +59,7 @@ partial class MainForm
         this.lblCandidateNumber.Text = "術科測試編號";
         this.lblCandidateNumber.Location = new Point(180, 25);
         this.lblCandidateNumber.Size = new Size(90, 23);
+        this.lblCandidateNumber.TextAlign = ContentAlignment.MiddleRight;
         this.txtNumber.Location = new Point(275, 22);
         this.txtNumber.Size = new Size(150, 23);
 
@@ -65,6 +67,7 @@ partial class MainForm
         this.lblDeskNumber.Text = "座號";
         this.lblDeskNumber.Location = new Point(10, 60);
         this.lblDeskNumber.Size = new Size(40, 23);
+        this.lblDeskNumber.TextAlign = ContentAlignment.MiddleRight;
         this.txtDesk.Location = new Point(55, 57);
         this.txtDesk.Size = new Size(100, 23);
 
@@ -72,15 +75,17 @@ partial class MainForm
         this.lblTestDate.Text = "考試日期";
         this.lblTestDate.Location = new Point(180, 60);
         this.lblTestDate.Size = new Size(90, 23);
+        this.lblTestDate.TextAlign = ContentAlignment.MiddleRight;
         this.txtDate.Location = new Point(275, 57);
         this.txtDate.Size = new Size(150, 23);
 
         // dgvResults
         this.dgvResults.AllowUserToAddRows = false;
+        this.dgvResults.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
         this.dgvResults.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
         this.dgvResults.Columns.AddRange(new DataGridViewColumn[] { this.colIndex, this.colPlayer, this.colBanker, this.colResult });
         this.dgvResults.Location = new Point(12, 120);
-        this.dgvResults.Size = new Size(760, 330);
+        this.dgvResults.Size = new Size(743, 330);
         this.dgvResults.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
 
         this.colIndex.HeaderText = "序號";
@@ -95,7 +100,7 @@ partial class MainForm
         // MainForm
         this.AutoScaleDimensions = new SizeF(7F, 15F);
         this.AutoScaleMode = AutoScaleMode.Font;
-        this.ClientSize = new Size(784, 461);
+        this.ClientSize = new Size(767, 461);
         this.Controls.Add(this.grpCandidate);
         this.Controls.Add(this.dgvResults);
         this.Text = "撲克牌比大小";
