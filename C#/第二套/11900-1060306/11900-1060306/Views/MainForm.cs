@@ -41,7 +41,7 @@ public partial class MainForm : Form, IMainView
         {
             if (record != null)
             {
-                dgvResults.Rows.Add(record.Id, record.Name, record.Sex, record.Error);
+                dgvResults.Rows.Add(record.Id, record.Name, record.Sex, record.Error ?? string.Empty);
             }
         }
     }
