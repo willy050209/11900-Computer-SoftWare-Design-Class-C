@@ -9,33 +9,51 @@ public class DotNetTestRunner : ITestRunnerService
     public event Action<string>? OutputReceived;
 
     private readonly string _solutionRoot;
+    private readonly string _toolsDir;
+    private readonly bool _isReleaseMode;
 
     public DotNetTestRunner()
     {
-        // 假設執行檔在 Test/TestLauncher/bin/Debug/net10.0-windows/
-        // Root 是向上 5 層
         string baseDir = AppContext.BaseDirectory;
-        _solutionRoot = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", ".."));
-        // 如果沒抓到 C# 資料夾，再往上一層 (適應不同的執行環境)
-        if (!Directory.Exists(Path.Combine(_solutionRoot, "C#")))
+        
+        // 偵測是否為發佈後的 "tools" 資料夾模式
+        _toolsDir = Path.Combine(baseDir, "tools");
+        _isReleaseMode = Directory.Exists(_toolsDir);
+
+        if (_isReleaseMode)
         {
-             _solutionRoot = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "..", ".."));
+            _solutionRoot = baseDir; // 發佈模式下以目前目錄為準
+        }
+        else
+        {
+            // 開發模式下的路徑追蹤 (適應不同的執行路徑)
+            string? current = baseDir;
+            while (current != null && !Directory.Exists(Path.Combine(current, "C#")))
+            {
+                current = Path.GetDirectoryName(current);
+            }
+            _solutionRoot = current ?? baseDir;
         }
     }
 
     public async Task RunTask1Async(Task1Config config)
     {
-        string projectPath = Path.Combine(_solutionRoot, "Test", "Task1Tester", "Task1Tester", "Task1Tester.csproj");
-        string args = $"run --project \"{projectPath}\" -- \"{config.CodePath}\" \"{config.UserPdfPath}\" \"{config.AnsPdfPath}\" \"{config.Name}\" \"{config.TestNo}\" \"{config.SeatNo}\" \"{config.LoopType}\"";
-        
-        await ExecuteDotNetAsync(args);
+        if (_isReleaseMode && File.Exists(Path.Combine(_toolsDir, "Task1Tester.exe")))
+        {
+            string exePath = Path.Combine(_toolsDir, "Task1Tester.exe");
+            string args = $"\"{config.CodePath}\" \"{config.UserPdfPath}\" \"{config.AnsPdfPath}\" \"{config.Name}\" \"{config.TestNo}\" \"{config.SeatNo}\" \"{config.LoopType}\"";
+            await ExecuteCommandAsync(exePath, args);
+        }
+        else
+        {
+            string projectPath = Path.Combine(_solutionRoot, "Test", "Task1Tester", "Task1Tester", "Task1Tester.csproj");
+            string args = $"run --project \"{projectPath}\" -- \"{config.CodePath}\" \"{config.UserPdfPath}\" \"{config.AnsPdfPath}\" \"{config.Name}\" \"{config.TestNo}\" \"{config.SeatNo}\" \"{config.LoopType}\"";
+            await ExecuteCommandAsync("dotnet", args);
+        }
     }
 
     public async Task RunTask2Async(Task2Config config, string name, string testNo, string seatNo)
     {
-        string projectPath = Path.Combine(_solutionRoot, "Test", "WinFormUITester", "WinFormUITester.csproj");
-        // 使用 --filter 來指定跑哪一個 Task 的測試
-        // 並透過 -- 傳遞參數給測試程式
         string filter = config.TaskId switch 
         {
             "task06" => "Task06UITest",
@@ -44,18 +62,38 @@ public class DotNetTestRunner : ITestRunnerService
             _ => throw new ArgumentException("Unknown Task ID")
         };
 
-        string args = $"test \"{projectPath}\" --filter \"{filter}\" -- --{config.TaskId}-exe \"{config.ExePath}\" --{config.TaskId}-data \"{config.TestDataPath}\" --name \"{name}\" --test-no \"{testNo}\" --seat-no \"{seatNo}\"";
-        
-        await ExecuteDotNetAsync(args);
+        // 使用環境變數傳遞參數，這在發佈模式下最穩定
+        var envVars = new Dictionary<string, string>
+        {
+            { "TEST_EXE_PATH", Path.GetFullPath(config.ExePath) },
+            { "TEST_DATA_PATH", Path.GetFullPath(config.TestDataPath) },
+            { "TEST_CANDIDATE_NAME", name },
+            { "TEST_CANDIDATE_NO", testNo },
+            { "TEST_CANDIDATE_SEAT", seatNo },
+            { "TEST_TASK_ID", config.TaskId }
+        };
+
+        if (_isReleaseMode && File.Exists(Path.Combine(_toolsDir, "WinFormUITester.dll")))
+        {
+            string dllPath = Path.Combine(_toolsDir, "WinFormUITester.dll");
+            string args = $"test \"{dllPath}\" --filter \"{filter}\"";
+            await ExecuteCommandAsync("dotnet", args, envVars);
+        }
+        else
+        {
+            string projectPath = Path.Combine(_solutionRoot, "Test", "WinFormUITester", "WinFormUITester.csproj");
+            string args = $"test \"{projectPath}\" --filter \"{filter}\"";
+            await ExecuteCommandAsync("dotnet", args, envVars);
+        }
     }
 
-    private async Task ExecuteDotNetAsync(string arguments)
+    private async Task ExecuteCommandAsync(string fileName, string arguments, Dictionary<string, string>? envVars = null)
     {
-        OutputReceived?.Invoke($"> dotnet {arguments}\n");
+        OutputReceived?.Invoke($"> {fileName} {arguments}\n");
 
         ProcessStartInfo psi = new()
         {
-            FileName = "dotnet",
+            FileName = fileName,
             Arguments = arguments,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
@@ -65,6 +103,14 @@ public class DotNetTestRunner : ITestRunnerService
             CreateNoWindow = true,
             WorkingDirectory = _solutionRoot
         };
+
+        if (envVars != null)
+        {
+            foreach (var kvp in envVars)
+            {
+                psi.EnvironmentVariables[kvp.Key] = kvp.Value;
+            }
+        }
 
         using Process process = new() { StartInfo = psi };
         

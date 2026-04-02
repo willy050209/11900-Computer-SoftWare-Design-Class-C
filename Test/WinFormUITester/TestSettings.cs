@@ -16,11 +16,19 @@ public static class TestSettings
 
     public static string? GetArgument(string flag)
     {
-        for (int i = 0; i < _args.Length - 1; i++)
+        for (int i = 0; i < _args.Length; i++)
         {
-            if (_args[i].Equals(flag, StringComparison.OrdinalIgnoreCase))
+            if (_args[i].Equals(flag, StringComparison.OrdinalIgnoreCase) && i + 1 < _args.Length)
             {
-                return _args[i + 1];
+                // 處理包含空格的路徑：如果後面的參數不以 "--" 開頭，則將它們拼回去
+                var valueParts = new System.Collections.Generic.List<string>();
+                int j = i + 1;
+                while (j < _args.Length && !_args[j].StartsWith("--"))
+                {
+                    valueParts.Add(_args[j]);
+                    j++;
+                }
+                return string.Join(" ", valueParts).Trim('\"');
             }
         }
         return null;
@@ -34,19 +42,22 @@ public static class TestSettings
 
     public static string GetExePath(string taskId, string defaultPath)
     {
-        // 先找特定 Task 的參數，例如 --task06-exe
-        string? path = GetArgument($"--{taskId}-exe") ?? GetArgument("--exe");
+        // 優先讀取通用環境變數，再找特定 Task 的參數
+        string? path = Environment.GetEnvironmentVariable("TEST_EXE_PATH") 
+                    ?? GetArgument($"--{taskId}-exe") 
+                    ?? GetArgument("--exe");
         return ResolvePath(path, defaultPath);
     }
 
     public static string GetTestDataPath(string taskId, string defaultPath)
     {
-        // 先找特定 Task 的參數，例如 --task06-data
-        string? path = GetArgument($"--{taskId}-data") ?? GetArgument("--data");
+        string? path = Environment.GetEnvironmentVariable("TEST_DATA_PATH")
+                    ?? GetArgument($"--{taskId}-data") 
+                    ?? GetArgument("--data");
         return ResolvePath(path, defaultPath);
     }
 
-    public static string GetCandidateName() => GetArgument("--name") ?? "陳宇威";
-    public static string GetCandidateTestNo() => GetArgument("--test-no") ?? "112590005";
-    public static string GetCandidateSeatNo() => GetArgument("--seat-no") ?? "005";
+    public static string GetCandidateName() => Environment.GetEnvironmentVariable("TEST_CANDIDATE_NAME") ?? GetArgument("--name") ?? "陳宇威";
+    public static string GetCandidateTestNo() => Environment.GetEnvironmentVariable("TEST_CANDIDATE_NO") ?? GetArgument("--test-no") ?? "112590005";
+    public static string GetCandidateSeatNo() => Environment.GetEnvironmentVariable("TEST_CANDIDATE_SEAT") ?? GetArgument("--seat-no") ?? "005";
 }

@@ -25,11 +25,19 @@
 - **彩色 Log 輸出**：仿 PowerShell 風格，直觀區分執行過程。
 - **高度相容性**：針對不同視窗比例進行佈局優化，解決元件重疊問題。
 
-### 執行方式：
+### 執行方式 (開發模式)：
 在專案根目錄執行：
 ```powershell
 dotnet run --project Test/TestLauncher/TestLauncher.csproj
 ```
+
+### 發佈與分發 (部署模式)：
+本專案提供 `publish.bat` 批次檔，可一鍵將測試工具打包為單一可執行檔：
+1. 執行根目錄下的 `publish.bat`。
+2. 編譯完成後，將產生的 `dist/` 目錄壓縮。
+3. 學弟妹只需解壓並執行 `TestLauncher.exe` 即可使用，無需手動編譯原始碼。
+
+*註：發佈後的 `TestLauncher.exe` 會自動偵測 `tools/` 目錄下的組件，優先以部署模式執行。*
 
 ---
 
