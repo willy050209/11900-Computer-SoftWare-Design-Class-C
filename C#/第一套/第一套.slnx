@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="第一套/第一套.csproj" />
+  <Project Path="ForLoopVersion/ForLoopVersion.csproj" />
+  <Project Path="WhileLoopVersion/WhileLoopVersion.csproj" />
+  <Project Path="DoWhileLoopVersion/DoWhileLoopVersion.csproj" />
+</Solution>

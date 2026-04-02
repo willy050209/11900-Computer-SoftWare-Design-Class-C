@@ -48,7 +48,7 @@ public class LocalizationService
         private string GetChinese(string key) => key switch
         {
         "Title" => "電腦軟體設計丙級 - 自動化測試啟動器",
-        "Task1Tab" => "第一站 (程式碼與 PDF 驗證)",
+        "Task1Tab" => "第一套 (程式碼與 PDF 驗證)",
         "Task2Tab" => "第二套 (UI 自動化測試)",
         "CodePath" => "程式碼路徑:",
         "UserPdf" => "應檢人 PDF:",
@@ -57,7 +57,7 @@ public class LocalizationService
         "TestNo" => "術科編號:",
         "SeatNo" => "座號:",
         "LoopType" => "迴圈型態:",
-        "RunTask1" => "執行第一站驗證",
+        "RunTask1" => "執行第一套驗證",
         "Exe" => "執行檔:",
         "Data" => "測試資料:",
         "RunT06" => "執行 06",

@@ -21,8 +21,8 @@ public partial class MainForm : Form, IMainView
         string root = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", ".."));
         if (!Directory.Exists(Path.Combine(root, "C#"))) root = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "..", ".."));
 
-        Task1CodePath = Path.Combine(root, "C#", "第一站", "第一站", "Program.cs");
-        Task1UserPdfPath = Path.Combine(root, "C#", "第一站", "第一站", "bin", "Debug", "net10.0-windows", "output.pdf");
+        Task1CodePath = Path.Combine(root, "C#", "第一套", "第一套", "Program.cs");
+        Task1UserPdfPath = Path.Combine(root, "C#", "第一套", "第一套", "bin", "Debug", "net10.0-windows", "output.pdf");
         Task1AnsPdfPath = Path.Combine(root, "ans.pdf");
         
         CandidateName = "陳宇威";

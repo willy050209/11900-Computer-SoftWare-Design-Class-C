@@ -5,11 +5,11 @@
 ## 專案結構
 
 - `/C#`: 包含考生開發的術科程式原始碼。
-  - `第一站`: 術科第一題至第五題。
+  - `第一套`: 術科第一題至第五題。
   - `第二套`: 術科第二套試題 (1060306, 1060307, 1060308)。
 - `/Test`: 自動化測試工具集
   - `TestLauncher`: 視覺化測試啟動器 (WinForm GUI)。
-  - `Task1Tester`: 術科第一站專屬自動化測試專案 (含程式碼規範與 PDF 頁首校驗)。
+  - `Task1Tester`: 術科第一套專屬自動化測試專案 (含程式碼規範與 PDF 頁首校驗)。
   - `WinFormUITester`: 術科第二套專屬 UI 自動化測試專案 (基於 FlaUI)。
 - `ans.pdf`: 術科測試參考答案 PDF。
 - `119003B14.pdf`: 術科測試應試人參考資料。
@@ -43,7 +43,7 @@ dotnet run --project Test/TestLauncher/TestLauncher.csproj
 
 ## 測試工具說明 (命令列介面)
 
-### 1. 術科第一站自動化測試 (Task1Tester)
+### 1. 術科第一套自動化測試 (Task1Tester)
 用於驗證 940301~940305 的演算法邏輯與 PDF 輸出格式。
 
 ### 2. 術科第二套 UI 自動化測試 (WinFormUITester)
