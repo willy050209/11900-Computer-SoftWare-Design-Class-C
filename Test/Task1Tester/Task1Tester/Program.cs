@@ -6,9 +6,8 @@ Console.WriteLine("=== Level C Computer Software Design: Task 1 Automation Teste
 // 1. Argument Parsing
 if (args.Length < 7)
 {
-    Console.WriteLine("Usage: dotnet run -- <code_path> <user_pdf_path> <ans_pdf_path> <name> <test_no> <seat_no> <loop_type>");
+    Console.WriteLine("Usage: dotnet run -- <code_path> <user_pdf_path> <ans_pdf_path> <name> <test_no> <seat_no> <loop_type> [report_path]");
     Console.WriteLine("Valid loop types: 'for', 'while', or 'do'");
-    Console.WriteLine("Example: dotnet run -- \"../Task1/Program.cs\" \"../Task1/output.pdf\" \"../../ans.pdf\" \"王小明\" \"112590001\" \"001\" \"for\"");
     return;
 }
 
@@ -19,6 +18,7 @@ var name = args[3];
 var testNo = args[4];
 var seatNo = args[5];
 var loopType = args[6].ToLowerInvariant();
+var reportPath = args.Length > 7 ? args[7] : null;
 
 if (loopType != "for" && loopType != "while" && loopType != "do")
 {
@@ -46,7 +46,7 @@ Console.WriteLine("[3/3] Validating PDF Content (Question 1-5)...");
 var contentResult = PdfValidatorService.ValidateContent(userPdfPath, ansPdfPath);
 violations.AddRange(contentResult.Violations);
 
-// 3. Final Report
+// 3. Final Report & HTML Generation
 Console.WriteLine("\n=== Validation Report ===");
 
 if (violations.Count == 0)
@@ -65,3 +65,16 @@ else
 }
 
 Console.ResetColor();
+
+if (!string.IsNullOrEmpty(reportPath))
+{
+    try 
+    {
+        ReportGeneratorService.GenerateHtmlReport(reportPath, expectedHeader, loopType, violations);
+        Console.WriteLine($"\n[HTML Report Generated]: {reportPath}");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"\n[Error] Failed to generate HTML report: {ex.Message}");
+    }
+}

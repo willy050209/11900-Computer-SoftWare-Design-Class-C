@@ -1,0 +1,27 @@
+{
+  "DefaultCandidate": {
+    "Name": "陳宇威",
+    "TestNo": "112590005",
+    "SeatNo": "005"
+  },
+  "Tasks": {
+    "task06": {
+      "ExePath": "C#\\第二套\\11900-1060306\\11900-1060306\\bin\\Debug\\net10.0-windows\\11900-1060306.exe",
+      "TestDataPath": "範例光碟(公告測試參考資料區)-修正\\1060306.SM",
+      "ExpectedTitle": "身分證號碼檢查",
+      "ExpectedColumns": ["ID_NO", "NAME", "SEX", "ERROR"]
+    },
+    "task07": {
+      "ExePath": "C#\\第二套\\11900-1060307\\11900-1060307\\bin\\Debug\\net10.0-windows\\11900-1060307.exe",
+      "TestDataPath": "範例光碟(公告測試參考資料區)-修正\\1060307.SM",
+      "ExpectedTitle": "應收帳款發票檢查",
+      "ExpectedColumns": ["CUST_NO", "INV_NO", "INV_AMT", "INV_DATE", "ERROR"]
+    },
+    "task08": {
+      "ExePath": "C#\\第二套\\11900-1060308\\11900-1060308\\bin\\Debug\\net10.0-windows\\11900-1060308.exe",
+      "TestDataPath": "範例光碟(公告測試參考資料區)-修正\\1060308.SM",
+      "ExpectedTitle": "員工加班費計算",
+      "ExpectedColumns": ["EMP_NO", "NAME", "OVER_TIME", "OVER_AMT", "TAX_AMT"]
+    }
+  }
+}

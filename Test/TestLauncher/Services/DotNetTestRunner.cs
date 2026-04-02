@@ -38,18 +38,24 @@ public class DotNetTestRunner : ITestRunnerService
 
     public async Task RunTask1Async(Task1Config config)
     {
+        string reportDir = Path.Combine(_solutionRoot, "TestReports");
+        if (!Directory.Exists(reportDir)) Directory.CreateDirectory(reportDir);
+        string reportPath = Path.Combine(reportDir, "Task1_Report.html");
+
         if (_isReleaseMode && File.Exists(Path.Combine(_toolsDir, "Task1Tester.exe")))
         {
             string exePath = Path.Combine(_toolsDir, "Task1Tester.exe");
-            string args = $"\"{config.CodePath}\" \"{config.UserPdfPath}\" \"{config.AnsPdfPath}\" \"{config.Name}\" \"{config.TestNo}\" \"{config.SeatNo}\" \"{config.LoopType}\"";
+            string args = $"\"{config.CodePath}\" \"{config.UserPdfPath}\" \"{config.AnsPdfPath}\" \"{config.Name}\" \"{config.TestNo}\" \"{config.SeatNo}\" \"{config.LoopType}\" \"{reportPath}\"";
             await ExecuteCommandAsync(exePath, args);
         }
         else
         {
             string projectPath = Path.Combine(_solutionRoot, "Test", "Task1Tester", "Task1Tester", "Task1Tester.csproj");
-            string args = $"run --project \"{projectPath}\" -- \"{config.CodePath}\" \"{config.UserPdfPath}\" \"{config.AnsPdfPath}\" \"{config.Name}\" \"{config.TestNo}\" \"{config.SeatNo}\" \"{config.LoopType}\"";
+            string args = $"run --project \"{projectPath}\" -- \"{config.CodePath}\" \"{config.UserPdfPath}\" \"{config.AnsPdfPath}\" \"{config.Name}\" \"{config.TestNo}\" \"{config.SeatNo}\" \"{config.LoopType}\" \"{reportPath}\"";
             await ExecuteCommandAsync("dotnet", args);
         }
+
+        OutputReceived?.Invoke($"\n[Test Report Generated]: {reportPath}\n");
     }
 
     public async Task RunTask2Async(Task2Config config, string name, string testNo, string seatNo)
@@ -73,18 +79,24 @@ public class DotNetTestRunner : ITestRunnerService
             { "TEST_TASK_ID", config.TaskId }
         };
 
+        string reportDir = Path.Combine(_solutionRoot, "TestReports");
+        if (!Directory.Exists(reportDir)) Directory.CreateDirectory(reportDir);
+        string reportFile = $"{config.TaskId}_Report.html";
+
         if (_isReleaseMode && File.Exists(Path.Combine(_toolsDir, "WinFormUITester.dll")))
         {
             string dllPath = Path.Combine(_toolsDir, "WinFormUITester.dll");
-            string args = $"test \"{dllPath}\" --filter \"{filter}\"";
+            string args = $"test \"{dllPath}\" --filter \"{filter}\" --logger \"html;LogFileName={reportFile}\" --results-directory \"{reportDir}\"";
             await ExecuteCommandAsync("dotnet", args, envVars);
         }
         else
         {
             string projectPath = Path.Combine(_solutionRoot, "Test", "WinFormUITester", "WinFormUITester.csproj");
-            string args = $"test \"{projectPath}\" --filter \"{filter}\"";
+            string args = $"test \"{projectPath}\" --filter \"{filter}\" --logger \"html;LogFileName={reportFile}\" --results-directory \"{reportDir}\"";
             await ExecuteCommandAsync("dotnet", args, envVars);
         }
+        
+        OutputReceived?.Invoke($"\n[Test Report Generated]: {Path.Combine(reportDir, reportFile)}\n");
     }
 
     private async Task ExecuteCommandAsync(string fileName, string arguments, Dictionary<string, string>? envVars = null)
