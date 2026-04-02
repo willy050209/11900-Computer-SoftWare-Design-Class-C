@@ -187,9 +187,9 @@ public partial class MainForm : Form, IMainView
         {
             string filter = "All Files (*.*)|*.*";
             if (target.Name.Contains("Pdf", StringComparison.OrdinalIgnoreCase)) filter = "PDF Files (*.pdf)|*.pdf";
-            if (target.Name.Contains("Code", StringComparison.OrdinalIgnoreCase)) filter = "C# Files (*.cs)|*.cs";
-            if (target.Name.Contains("Exe", StringComparison.OrdinalIgnoreCase)) filter = "Executable Files (*.exe)|*.exe";
-            if (target.Name.Contains("Data", StringComparison.OrdinalIgnoreCase)) filter = "SM Files (*.sm)|*.sm|All Files (*.*)|*.*";
+            if (target.Name.Contains("Code", StringComparison.OrdinalIgnoreCase)) filter = "Code Files (*.cs;*.vb)|*.cs;*.vb|All Files (*.*)|*.*";
+            if (target.Name.Contains("Exe", StringComparison.OrdinalIgnoreCase)) filter = "Executable Files (*.exe)|*.exe|All Files (*.*)|*.*";
+            if (target.Name.Contains("Data", StringComparison.OrdinalIgnoreCase)) filter = "Data Files (*.SM;*.T01)|*.SM;*.T01|All Files (*.*)|*.*";
 
             string? path = ShowFileOpenDialog(filter);
             if (path != null) target.Text = path;
