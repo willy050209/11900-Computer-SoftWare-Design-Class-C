@@ -21,6 +21,63 @@ public class MainFormPage
     public FlaUI.Core.AutomationElements.TextBox NumberTextBox => FindControlWithRetry<FlaUI.Core.AutomationElements.TextBox>("txtNumber");
     public FlaUI.Core.AutomationElements.DataGridView ResultsGrid => FindControlWithRetry<FlaUI.Core.AutomationElements.DataGridView>("dgvResults");
 
+    /// <summary>
+    /// 根據標籤名稱尋找右側最近的控制項並獲取其文字內容
+    /// </summary>
+    public string GetValueByLabel(string labelName)
+    {
+        // 1. 找到標籤元件 (精確匹配 Name/Text)
+        var label = _window.FindFirstDescendant(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Text).And(cf.ByName(labelName)));
+        if (label == null) 
+        {
+            // 嘗試模糊匹配 (處理空白問題)
+            string simplifiedName = labelName.Replace(" ", "");
+            label = _window.FindAllDescendants(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Text))
+                           .FirstOrDefault(c => c.Name.Replace(" ", "") == simplifiedName);
+        }
+
+        if (label == null) throw new Exception($"找不到標籤: {labelName}");
+
+        var labelBounds = label.BoundingRectangle;
+        var labelCenterY = labelBounds.Top + (labelBounds.Height / 2);
+        
+        // 2. 獲取所有可能的「數值容器」元件 (排除 Label 自身)
+        var candidates = _window.FindAllDescendants(cf => 
+            cf.ByControlType(FlaUI.Core.Definitions.ControlType.Edit) // TextBox
+            .Or(cf.ByControlType(FlaUI.Core.Definitions.ControlType.Text)) // 可能是用 Label 顯示數值
+            .Or(cf.ByControlType(FlaUI.Core.Definitions.ControlType.Document))
+        );
+
+        // 3. 篩選出位於標籤右側、且垂直中心點接近的元件
+        var nearest = candidates
+            .Where(c => !string.IsNullOrEmpty(c.AutomationId) && c.AutomationId != label.AutomationId)
+            .Select(c => new { Element = c, Bounds = c.BoundingRectangle })
+            .Where(c => c.Bounds.Left >= labelBounds.Left + 5 && // 在標籤起點右方
+                        c.Bounds.Left < labelBounds.Right + 400 && // 容許一定距離
+                        Math.Abs((c.Bounds.Top + c.Bounds.Height / 2) - labelCenterY) < 20) // 垂直中心對齊 (放寬到 20)
+            .OrderBy(c => {
+                // 優先級 1: 水平距離 (以左側距離標籤左側的位移為準)
+                double distance = Math.Abs(c.Bounds.Left - labelBounds.Right);
+                // 優先級 2: 如果是在標籤內部或重疊，給予較高優先權 (距離設為 0)
+                if (c.Bounds.Left < labelBounds.Right && c.Bounds.Right > labelBounds.Left) distance = 0;
+                
+                return distance;
+            })
+            .FirstOrDefault();
+
+        if (nearest == null) throw new Exception($"在標籤 '{labelName}' 右側找不到對應的數值控制項");
+
+        // 4. 讀取值
+        var el = nearest.Element;
+        if (el.ControlType == FlaUI.Core.Definitions.ControlType.Edit)
+        {
+            return el.AsTextBox().Text;
+        }
+        
+        // 如果是 Text (Label)，則其 Name 就是顯示的內容
+        return el.Name; 
+    }
+
     private T FindControlWithRetry<T>(string automationId) where T : AutomationElement
     {
         var retryResult = FlaUI.Core.Tools.Retry.WhileNull(() => 
@@ -39,7 +96,7 @@ public class MainFormPage
         throw new NotSupportedException($"不支援的控制項型別: {typeof(T).Name}");
     }
 
-    public void VerifyUILayout(string expectedTitle, string[] expectedColumns)
+    public void VerifyUILayout(string expectedTitle, string[] expectedColumns, string? expectedName = null, string? expectedTestNo = null, string? expectedSeatNo = null)
     {
         // 1. 驗證視窗標題
         if (_window.Title != expectedTitle)
@@ -54,17 +111,17 @@ public class MainFormPage
             throw new Exception($"找不到標題為 '應檢人資料' 的群組框，或標題不符。實際: '{groupBox?.Name}'");
         }
 
-        // 3. 驗證應檢人資料標籤
-        var labels = _window.FindAllDescendants(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Text))
-                            .Select(x => x.Name).ToList();
+        // 3. 驗證應檢人資料內容 (利用相對定位)
+        if (expectedName != null) ValidateField("姓名", expectedName);
+        if (expectedTestNo != null) ValidateField("術科測試編號", expectedTestNo);
+        if (expectedSeatNo != null) ValidateField("座號", expectedSeatNo);
         
-        string[] requiredLabels = { "姓名", "術科測試編號", "座號", "考 試 日 期" };
-        foreach (var reqLabel in requiredLabels)
+        // 驗證日期格式 (西元 YYYY/MM/DD)
+        var dateValue = GetValueByLabel("考 試 日 期");
+        var todayGregorian = $"{DateTime.Now:yyyy/MM/dd}";
+        if (dateValue != todayGregorian)
         {
-            if (!labels.Contains(reqLabel))
-            {
-                throw new Exception($"找不到必要的標籤: '{reqLabel}'");
-            }
+            throw new Exception($"日期不符。預期: '{todayGregorian}', 實際: '{dateValue}'");
         }
 
         // 4. 驗證 DataGridView 欄位標題
@@ -81,6 +138,15 @@ public class MainFormPage
                     throw new Exception($"DataGridView 欄位不符。預期第 {i} 欄為 '{expectedColumns[i]}'，實際為 '{(i < headerItems.Count ? headerItems[i] : "null")}'");
                 }
             }
+        }
+    }
+
+    private void ValidateField(string label, string expectedValue)
+    {
+        string actual = GetValueByLabel(label);
+        if (actual != expectedValue)
+        {
+            throw new Exception($"欄位 '{label}' 驗證失敗。預期: '{expectedValue}', 實際: '{actual}'");
         }
     }
 

@@ -45,4 +45,8 @@ public static class TestSettings
         string? path = GetArgument($"--{taskId}-data") ?? GetArgument("--data");
         return ResolvePath(path, defaultPath);
     }
+
+    public static string GetCandidateName() => GetArgument("--name") ?? "陳宇威";
+    public static string GetCandidateTestNo() => GetArgument("--test-no") ?? "112590005";
+    public static string GetCandidateSeatNo() => GetArgument("--seat-no") ?? "005";
 }

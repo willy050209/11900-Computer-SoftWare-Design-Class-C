@@ -25,8 +25,8 @@ public partial class MainForm : Form, IMainView
         Task1AnsPdfPath = Path.Combine(root, "ans.pdf");
         
         CandidateName = "陳宇威";
-        CandidateTestNo = "119003B14";
-        CandidateSeatNo = "01";
+        CandidateTestNo = "112590005";
+        CandidateSeatNo = "005";
         LoopType = "for";
 
         Task06ExePath = Path.Combine(root, "C#", "第二套", "11900-1060306", "11900-1060306", "bin", "Debug", "net10.0-windows", "11900-1060306.exe");

@@ -104,7 +104,7 @@ public class MainPresenter
 
         try
         {
-            await _runner.RunTask2Async(config);
+            await _runner.RunTask2Async(config, _view.CandidateName, _view.CandidateTestNo, _view.CandidateSeatNo);
         }
         catch (Exception ex)
         {

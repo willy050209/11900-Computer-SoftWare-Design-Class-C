@@ -5,5 +5,5 @@ public interface ITestRunnerService
 {
     event Action<string>? OutputReceived;
     Task RunTask1Async(TestLauncher.Models.Task1Config config);
-    Task RunTask2Async(TestLauncher.Models.Task2Config config);
+    Task RunTask2Async(TestLauncher.Models.Task2Config config, string name, string testNo, string seatNo);
 }

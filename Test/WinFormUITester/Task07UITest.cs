@@ -61,10 +61,14 @@ public class Task07UITest : IDisposable
         // 4. 驗證資料與 UI
         Thread.Sleep(5000); 
         
-        // 驗證 UI 佈局
-        mainPage.VerifyUILayout("撲克牌比大小", new[] { "序號", "玩家", "莊家", "結果" });
+        // 驗證 UI 佈局 (標題、群組框、標籤、欄位、應檢人資料)
+        mainPage.VerifyUILayout("撲克牌比大小", 
+            new[] { "序號", "玩家", "莊家", "結果" },
+            TestSettings.GetCandidateName(),
+            TestSettings.GetCandidateTestNo(),
+            TestSettings.GetCandidateSeatNo());
 
-        Assert.Equal("陳宇威", mainPage.NameTextBox.Text);
+        Assert.Equal(TestSettings.GetCandidateName(), mainPage.GetValueByLabel("姓名"));
         var grid = mainPage.ResultsGrid;
         Assert.True(grid.Rows.Length > 0, "撲克牌比大小應該有回合資料");
 

@@ -63,10 +63,14 @@ public class Task06UITest : IDisposable
         // 4. 驗證資料與 UI
         Thread.Sleep(5000); 
         
-        // 驗證 UI 佈局 (標題、群組框、標籤、欄位)
-        mainPage.VerifyUILayout("身分證號碼檢查", new[] { "ID_NO", "NAME", "SEX", "ERROR" });
+        // 驗證 UI 佈局 (標題、群組框、標籤、欄位、應檢人資料)
+        mainPage.VerifyUILayout("身分證號碼檢查", 
+            new[] { "ID_NO", "NAME", "SEX", "ERROR" },
+            TestSettings.GetCandidateName(),
+            TestSettings.GetCandidateTestNo(),
+            TestSettings.GetCandidateSeatNo());
 
-        Assert.Equal("陳宇威", mainPage.NameTextBox.Text);
+        Assert.Equal(TestSettings.GetCandidateName(), mainPage.GetValueByLabel("姓名"));
         Assert.True(mainPage.ResultsGrid.Rows.Length > 0, "身分證檢查應該有結果資料");
     }
 

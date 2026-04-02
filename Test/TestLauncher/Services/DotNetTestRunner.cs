@@ -31,7 +31,7 @@ public class DotNetTestRunner : ITestRunnerService
         await ExecuteDotNetAsync(args);
     }
 
-    public async Task RunTask2Async(Task2Config config)
+    public async Task RunTask2Async(Task2Config config, string name, string testNo, string seatNo)
     {
         string projectPath = Path.Combine(_solutionRoot, "Test", "WinFormUITester", "WinFormUITester.csproj");
         // 使用 --filter 來指定跑哪一個 Task 的測試
@@ -44,7 +44,7 @@ public class DotNetTestRunner : ITestRunnerService
             _ => throw new ArgumentException("Unknown Task ID")
         };
 
-        string args = $"test \"{projectPath}\" --filter \"{filter}\" -- --{config.TaskId}-exe \"{config.ExePath}\" --{config.TaskId}-data \"{config.TestDataPath}\"";
+        string args = $"test \"{projectPath}\" --filter \"{filter}\" -- --{config.TaskId}-exe \"{config.ExePath}\" --{config.TaskId}-data \"{config.TestDataPath}\" --name \"{name}\" --test-no \"{testNo}\" --seat-no \"{seatNo}\"";
         
         await ExecuteDotNetAsync(args);
     }
