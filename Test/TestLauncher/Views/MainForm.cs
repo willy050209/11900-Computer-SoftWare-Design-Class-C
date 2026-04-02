@@ -118,6 +118,7 @@ public partial class MainForm : Form, IMainView
         btnRunT06.Enabled = !busy;
         btnRunT07.Enabled = !busy;
         btnRunT08.Enabled = !busy;
+        btnRunAllTask2.Enabled = !busy;
         this.Cursor = busy ? Cursors.WaitCursor : Cursors.Default;
     }
 
@@ -164,6 +165,8 @@ public partial class MainForm : Form, IMainView
         UpdateControlText("lblExe08", getStr("Exe"));
         UpdateControlText("lblData08", getStr("Data"));
         btnRunT08.Text = getStr("RunT08");
+
+        btnRunAllTask2.Text = getStr("RunAllTask2");
     }
 
     private void UpdateControlText(string name, string text)
@@ -176,6 +179,7 @@ public partial class MainForm : Form, IMainView
     private async void btnRunT06_Click(object? sender, EventArgs e) => await _presenter.RunTask2Async("task06");
     private async void btnRunT07_Click(object? sender, EventArgs e) => await _presenter.RunTask2Async("task07");
     private async void btnRunT08_Click(object? sender, EventArgs e) => await _presenter.RunTask2Async("task08");
+    private async void btnRunAllTask2_Click(object? sender, EventArgs e) => await _presenter.RunAllTask2Async();
 
     private void btnBrowse_Click(object? sender, EventArgs e)
     {

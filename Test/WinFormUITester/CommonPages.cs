@@ -141,6 +141,32 @@ public class MainFormPage
         }
     }
 
+    public void VerifyData(Action<string[]> rowValidator)
+    {
+        var grid = ResultsGrid;
+        var rows = grid.Rows;
+        
+        for (int i = 0; i < rows.Length; i++)
+        {
+            var row = rows[i];
+            // 擷取該列所有儲存格的數值，並處理 (null) 或空值問題
+            string[] values = row.Cells.Select(c => {
+                string val = c.Value?.ToString() ?? "";
+                if (val == "(null)") val = "";
+                return val.Trim();
+            }).ToArray();
+            
+            try
+            {
+                rowValidator(values);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"DataGridView 第 {i + 1} 列驗證失敗: {ex.Message} (原始資料: {string.Join(", ", values)})");
+            }
+        }
+    }
+
     private void ValidateField(string label, string expectedValue)
     {
         string actual = GetValueByLabel(label);

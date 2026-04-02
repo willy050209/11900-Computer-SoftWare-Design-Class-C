@@ -88,23 +88,39 @@ public class MainPresenter
         }
     }
 
+    public async Task RunAllTask2Async()
+    {
+        _view.SetBusy(true);
+        _view.ClearLog();
+        _view.AppendLog("Starting All Task 2 UI Tests sequentially...\n");
+
+        try
+        {
+            await RunTask2InternalAsync("task06");
+            await RunTask2InternalAsync("task07");
+            await RunTask2InternalAsync("task08");
+            
+            _view.AppendLog("\n[All Task 2 Tests Completed]\n");
+        }
+        catch (Exception ex)
+        {
+            _view.AppendLog($"ERROR during sequence: {ex.Message}\n");
+        }
+        finally
+        {
+            _view.SetBusy(false);
+        }
+    }
+
     public async Task RunTask2Async(string taskId)
     {
         _view.SetBusy(true);
         _view.ClearLog();
         _view.AppendLog($"Starting {taskId.ToUpper()} UI Test...\n");
 
-        Task2Config config = taskId switch
-        {
-            "task06" => new Task2Config("task06", _view.Task06ExePath, _view.Task06DataPath),
-            "task07" => new Task2Config("task07", _view.Task07ExePath, _view.Task07DataPath),
-            "task08" => new Task2Config("task08", _view.Task08ExePath, _view.Task08DataPath),
-            _ => throw new ArgumentException("Unknown Task ID")
-        };
-
         try
         {
-            await _runner.RunTask2Async(config, _view.CandidateName, _view.CandidateTestNo, _view.CandidateSeatNo);
+            await RunTask2InternalAsync(taskId);
         }
         catch (Exception ex)
         {
@@ -114,5 +130,18 @@ public class MainPresenter
         {
             _view.SetBusy(false);
         }
+    }
+
+    private async Task RunTask2InternalAsync(string taskId)
+    {
+        Task2Config config = taskId switch
+        {
+            "task06" => new Task2Config("task06", _view.Task06ExePath, _view.Task06DataPath),
+            "task07" => new Task2Config("task07", _view.Task07ExePath, _view.Task07DataPath),
+            "task08" => new Task2Config("task08", _view.Task08ExePath, _view.Task08DataPath),
+            _ => throw new ArgumentException("Unknown Task ID")
+        };
+
+        await _runner.RunTask2Async(config, _view.CandidateName, _view.CandidateTestNo, _view.CandidateSeatNo);
     }
 }

@@ -72,6 +72,19 @@ public class Task06UITest : IDisposable
 
         Assert.Equal(TestSettings.GetCandidateName(), mainPage.GetValueByLabel("姓名"));
         Assert.True(mainPage.ResultsGrid.Rows.Length > 0, "身分證檢查應該有結果資料");
+
+        // 5. 驗證資料列數值
+        mainPage.VerifyData(row => {
+            string id = row[0];
+            string sex = row[2];
+            string actualError = row[3];
+            string expectedError = ValidationService.GetIdCardError(id, sex);
+            
+            if (actualError != expectedError)
+            {
+                throw new Exception($"身分證 {id} ({sex}) 驗證錯誤。預期: '{expectedError}', 實際: '{actualError}'");
+            }
+        });
     }
 
     public void Dispose()

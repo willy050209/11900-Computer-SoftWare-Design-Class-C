@@ -72,6 +72,20 @@ public class Task08UITest : IDisposable
         var grid = mainPage.ResultsGrid;
         Assert.True(grid.Rows.Length > 0, "分數運算應該有結果資料");
 
+        // 5. 驗證資料列數值
+        mainPage.VerifyData(row => {
+            string v1 = row[0];
+            string op = row[1];
+            string v2 = row[2];
+            string actualAns = row[3];
+            string expectedAns = ValidationService.GetFractionAnswer(v1, op, v2);
+
+            if (actualAns != expectedAns)
+            {
+                throw new Exception($"分數運算錯誤。{v1} {op} {v2}。預期: '{expectedAns}', 實際: '{actualAns}'");
+            }
+        });
+
         // 驗證第一筆運算結果是否包含分數格式或整數
         var firstAnswer = grid.Rows[0].Cells[3].Value;
         Assert.NotEmpty(firstAnswer);

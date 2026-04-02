@@ -39,13 +39,14 @@ public class LocalizationService
         "RunT06" => "Run T06",
         "RunT07" => "Run T07",
         "RunT08" => "Run T08",
+        "RunAllTask2" => "Run All Task 2 Tests",
         "Language" => "Language:",
         "CandidateGroup" => "Candidate Information",
         _ => key
-    };
+        };
 
-    private string GetChinese(string key) => key switch
-    {
+        private string GetChinese(string key) => key switch
+        {
         "Title" => "電腦軟體設計丙級 - 自動化測試啟動器",
         "Task1Tab" => "第一站 (程式碼與 PDF 驗證)",
         "Task2Tab" => "第二套 (UI 自動化測試)",
@@ -62,8 +63,9 @@ public class LocalizationService
         "RunT06" => "執行 06",
         "RunT07" => "執行 07",
         "RunT08" => "執行 08",
+        "RunAllTask2" => "執行全部第二套測試",
         "Language" => "語言:",
         "CandidateGroup" => "應檢人資料",
         _ => key
-    };
+        };
 }

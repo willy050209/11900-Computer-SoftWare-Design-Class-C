@@ -72,6 +72,19 @@ public class Task07UITest : IDisposable
         var grid = mainPage.ResultsGrid;
         Assert.True(grid.Rows.Length > 0, "撲克牌比大小應該有回合資料");
 
+        // 5. 驗證資料列數值
+        mainPage.VerifyData(row => {
+            string playerCard = row[1];
+            string bankerCard = row[2];
+            string actualResult = row[3];
+            string expectedResult = ValidationService.GetPokerResult(playerCard, bankerCard);
+
+            if (actualResult != expectedResult)
+            {
+                throw new Exception($"撲克牌比對錯誤。玩家: {playerCard}, 莊家: {bankerCard}。預期: '{expectedResult}', 實際: '{actualResult}'");
+            }
+        });
+
         // 隨機檢查一筆資料是否包含撲克牌符號 (♠, ♥, ♦, ♣)
         var firstPlayerCard = grid.Rows[0].Cells[1].Value;
         Assert.Matches("[♠♥♦♣]", firstPlayerCard);
