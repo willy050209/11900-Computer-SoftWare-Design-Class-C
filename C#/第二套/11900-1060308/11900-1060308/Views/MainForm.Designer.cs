@@ -171,7 +171,7 @@ partial class MainForm
         Controls.Add(dgvResults);
         Margin = new Padding(4, 5, 4, 5);
         Name = "MainForm";
-        Text = "分數加、減、乘、除運算";
+        Text = "求出分數的加、減、乘、除運算";
         grpCandidate.ResumeLayout(false);
         grpCandidate.PerformLayout();
         ((System.ComponentModel.ISupportInitialize)dgvResults).EndInit();
