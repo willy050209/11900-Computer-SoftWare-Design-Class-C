@@ -19,8 +19,11 @@ public class Task07UITest : IDisposable
         string solutionDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", ".."));
         if (!Directory.Exists(Path.Combine(solutionDir, "C#"))) solutionDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "..", ".."));
 
-        _exePath = Path.Combine(solutionDir, "C#", "第二套", "11900-1060307", "11900-1060307", "bin", "Debug", "net10.0-windows", "11900-1060307.exe");
-        _testFilePath = Path.Combine(solutionDir, "範例光碟(公告測試參考資料區)-修正", "1060307.SM");
+        string defaultExePath = Path.Combine(solutionDir, "C#", "第二套", "11900-1060307", "11900-1060307", "bin", "Debug", "net10.0-windows", "11900-1060307.exe");
+        string defaultTestFilePath = Path.Combine(solutionDir, "範例光碟(公告測試參考資料區)-修正", "1060307.SM");
+
+        _exePath = TestSettings.GetExePath("task07", defaultExePath);
+        _testFilePath = TestSettings.GetTestDataPath("task07", defaultTestFilePath);
 
         if (!File.Exists(_exePath)) throw new FileNotFoundException($"找不到執行檔: {_exePath}");
 

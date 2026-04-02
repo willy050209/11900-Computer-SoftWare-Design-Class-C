@@ -1,4 +1,5 @@
 ﻿// filepath: Program.cs
+Console.OutputEncoding = System.Text.Encoding.UTF8;
 
 Console.WriteLine("=== Level C Computer Software Design: Task 1 Automation Tester ===");
 
