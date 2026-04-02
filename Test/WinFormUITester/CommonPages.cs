@@ -26,7 +26,17 @@ public class OpenFileDialogComponent
         if (edit == null) throw new Exception("找不到檔名輸入框");
 
         edit.Focus();
-        edit.Enter(filePath);
+        
+        // 優先使用 ValuePattern (直接設定值，不受輸入法 IME 影響)
+        if (edit.Patterns.Value.IsSupported)
+        {
+            edit.Patterns.Value.Pattern.SetValue(filePath);
+        }
+        else
+        {
+            // 備援方案：模擬鍵盤輸入
+            edit.Enter(filePath);
+        }
 
         var openBtn = _window.FindFirstDescendant(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Button).And(cf.ByName("開啟").Or(cf.ByAutomationId("1"))))?.AsButton();
         if (openBtn != null) openBtn.Invoke();
