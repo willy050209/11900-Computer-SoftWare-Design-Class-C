@@ -40,13 +40,15 @@ public static class CodeValidatorService
             for (int i = 1; i <= 5; i++)
             {
                 string xx = i.ToString("D2");
-                // Escaping asterisks for regex: \*
-                string specificPattern = $@"{Regex.Escape(commentSym)}\s*\*{{30}}\r?\n{Regex.Escape(commentSym)}\s*\* 11900-9403{xx} Program Start \*\r?\n{Regex.Escape(commentSym)}\s*\*{{30}}";
+                // Allow optional leading whitespace before the comment symbol
+                string escapedSym = Regex.Escape(commentSym);
+                string specificPattern = $@"\s*{escapedSym}\s*\*{{30}}\r?\n\s*{escapedSym}\s*\* 11900-9403{xx} Program Start \*\r?\n\s*{escapedSym}\s*\*{{30}}";
                 if (!Regex.IsMatch(code, specificPattern))
                 {
                     missingHeaders.Add(xx);
                 }
             }
+
 
             if (missingHeaders.Count > 0)
             {
@@ -123,9 +125,29 @@ public static class CodeValidatorService
             else // .vb
             {
                 hasFor = Regex.IsMatch(codeWithoutComments, @"\bFor\b", RegexOptions.IgnoreCase);
-                hasWhile = Regex.IsMatch(codeWithoutComments, @"\bWhile\b", RegexOptions.IgnoreCase) || Regex.IsMatch(codeWithoutComments, @"\bDo\s+While\b", RegexOptions.IgnoreCase);
-                hasDo = Regex.IsMatch(codeWithoutComments, @"\bDo\b", RegexOptions.IgnoreCase) && !Regex.IsMatch(codeWithoutComments, @"\bDo\s+While\b", RegexOptions.IgnoreCase);
+                
+                // VB While types: "While...End While" or "Do While...Loop"
+                bool hasDoWhile = Regex.IsMatch(codeWithoutComments, @"\bDo\s+While\b", RegexOptions.IgnoreCase);
+                bool hasStandaloneWhile = false;
+                
+                var whileMatches = Regex.Matches(codeWithoutComments, @"\bWhile\b", RegexOptions.IgnoreCase);
+                foreach (Match m in whileMatches)
+                {
+                    string before = codeWithoutComments.Substring(0, m.Index);
+                    // If 'While' is not preceded by 'Do ' or 'Loop ', it's a standalone While
+                    if (!Regex.IsMatch(before, @"\bDo\s+$", RegexOptions.IgnoreCase) && 
+                        !Regex.IsMatch(before, @"\bLoop\s+$", RegexOptions.IgnoreCase))
+                    {
+                        hasStandaloneWhile = true;
+                    }
+                }
+                hasWhile = hasStandaloneWhile || hasDoWhile;
+
+                // VB Do type: "Do...Loop While" or "Do...Loop Until" (strictly post-test)
+                hasDo = Regex.IsMatch(codeWithoutComments, @"\bLoop\s+While\b", RegexOptions.IgnoreCase) || 
+                        Regex.IsMatch(codeWithoutComments, @"\bLoop\s+Until\b", RegexOptions.IgnoreCase);
             }
+
 
 
             var usedLoops = new List<string>();

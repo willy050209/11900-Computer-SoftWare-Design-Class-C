@@ -53,16 +53,20 @@ public static class ValidationService
     private static int GetCardPower(string card)
     {
         // card format: "♠A", "♥10", etc.
+        // The first character is the suit symbol, the rest is the rank.
         string rankStr = card[1..];
+
         return rankStr switch
         {
-            "A" => 14,
-            "J" => 11,
-            "Q" => 12,
-            "K" => 13,
-            _ => int.Parse(rankStr)
+            "A" => 13,
+            "K" => 12,
+            "Q" => 11,
+            "J" => 10,
+            _ => int.Parse(rankStr) - 1
         };
     }
+
+
 
     /// <summary>
     /// 驗證分數運算邏輯 (Task 08)

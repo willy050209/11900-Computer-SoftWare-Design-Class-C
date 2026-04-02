@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="ForLoopVersion/ForLoopVersion.vbproj" />
+  <Project Path="WhileLoopVersion/WhileLoopVersion.vbproj" />
+  <Project Path="DoWhileLoopVersion/DoWhileLoopVersion.vbproj" />
+</Solution>

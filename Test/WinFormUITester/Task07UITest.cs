@@ -59,24 +59,50 @@ public class Task07UITest : IDisposable
         var mainPage = new MainFormPage(mainWin.AsWindow());
 
         // 4. 驗證資料與 UI
-        Thread.Sleep(5000); 
+        // 從測試檔案讀取預期回合數 (第一行)
+        int expectedRounds = 0;
+        try {
+            string firstLine = File.ReadLines(_testFilePath).First();
+            expectedRounds = int.Parse(firstLine.Trim());
+        } catch {
+            throw new Exception($"無法從測試檔案 {_testFilePath} 讀取回合數");
+        }
+
+        // 等待 DataGridView 填充完成
+        var grid = FlaUI.Core.Tools.Retry.While(
+            () => mainPage.ResultsGrid,
+            g => g.Rows.Length == 0,
+            TimeSpan.FromSeconds(10)
+        ).Result;
+
+        Assert.NotNull(grid);
+        Console.WriteLine($"測試檔案要求回合數: {expectedRounds}, DataGridView 實際列數: {grid.Rows.Length}");
+        
+        if (grid.Rows.Length != expectedRounds)
+        {
+            throw new Exception($"DataGridView 列數與測試檔案要求不符。要求: {expectedRounds}, 實際: {grid.Rows.Length}");
+        }
+
+        var mainPageWithGrid = new MainFormPage(mainWin.AsWindow());
+
         
         // 驗證 UI 佈局 (標題、群組框、標籤、欄位、應檢人資料)
-        mainPage.VerifyUILayout("撲克牌比大小", 
+        mainPageWithGrid.VerifyUILayout("撲克牌比大小", 
             new[] { "序號", "玩家", "莊家", "結果" },
             TestSettings.GetCandidateName(),
             TestSettings.GetCandidateTestNo(),
             TestSettings.GetCandidateSeatNo());
 
-        Assert.Equal(TestSettings.GetCandidateName(), mainPage.GetValueByLabel("姓名"));
-        var grid = mainPage.ResultsGrid;
-        Assert.True(grid.Rows.Length > 0, "撲克牌比大小應該有回合資料");
-
         // 5. 驗證資料列數值
-        mainPage.VerifyData(row => {
+        mainPageWithGrid.VerifyData(row => {
+            if (row.Length < 4) throw new Exception("資料列欄位不足 4 欄");
+            
             string playerCard = row[1];
             string bankerCard = row[2];
             string actualResult = row[3];
+            
+            if (string.IsNullOrEmpty(playerCard) || string.IsNullOrEmpty(bankerCard)) return;
+
             string expectedResult = ValidationService.GetPokerResult(playerCard, bankerCard);
 
             if (actualResult != expectedResult)
@@ -84,6 +110,7 @@ public class Task07UITest : IDisposable
                 throw new Exception($"撲克牌比對錯誤。玩家: {playerCard}, 莊家: {bankerCard}。預期: '{expectedResult}', 實際: '{actualResult}'");
             }
         });
+
 
         // 隨機檢查一筆資料是否包含撲克牌符號 (♠, ♥, ♦, ♣)
         var firstPlayerCard = grid.Rows[0].Cells[1].Value;

@@ -73,11 +73,26 @@ public class Task06UITest : IDisposable
         Assert.Equal(TestSettings.GetCandidateName(), mainPage.GetValueByLabel("姓名"));
         Assert.True(mainPage.ResultsGrid.Rows.Length > 0, "身分證檢查應該有結果資料");
 
-        // 5. 驗證資料列數值
+        // 5. 驗證資料列數值與排序
+        string? previousId = null;
         mainPage.VerifyData(row => {
             string id = row[0];
+            string name = row[1];
             string sex = row[2];
             string actualError = row[3];
+            
+            // 檢查排序 (字典序)
+            if (previousId != null && string.Compare(id, previousId, StringComparison.Ordinal) < 0)
+            {
+                throw new Exception($"DataGridView 未按 ID_NO 排序。'{id}' 出現在 '{previousId}' 之後。");
+            }
+            previousId = id;
+
+            if (string.IsNullOrWhiteSpace(name) || name == "TEST")
+            {
+                throw new Exception($"身分證 {id} 的姓名欄位不正確。實際值: '{name}'");
+            }
+
             string expectedError = ValidationService.GetIdCardError(id, sex);
             
             if (actualError != expectedError)
@@ -85,6 +100,8 @@ public class Task06UITest : IDisposable
                 throw new Exception($"身分證 {id} ({sex}) 驗證錯誤。預期: '{expectedError}', 實際: '{actualError}'");
             }
         });
+
+
     }
 
     public void Dispose()
