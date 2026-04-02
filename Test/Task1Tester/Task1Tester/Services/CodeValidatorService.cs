@@ -25,6 +25,9 @@ public static class CodeValidatorService
             }
 
             var code = File.ReadAllText(codePath);
+            
+            // Pre-process code to remove comments for loop detection
+            string codeWithoutComments = Regex.Replace(code, @"//.*|/\*[\s\S]*?\*/|'.*", "");
 
             // 0. Rule: Required Header (Page 1, Rule 5.1)
             // Header format must be present for ALL questions 01-05:
@@ -33,10 +36,12 @@ public static class CodeValidatorService
             // // ******************************
             
             var missingHeaders = new List<string>();
+            string commentSym = extension == ".vb" ? "'" : "//";
             for (int i = 1; i <= 5; i++)
             {
                 string xx = i.ToString("D2");
-                string specificPattern = $@"// \*{{30}}\r?\n// \* 11900-9403{xx} Program Start \*\r?\n// \*{{30}}";
+                // Escaping asterisks for regex: \*
+                string specificPattern = $@"{Regex.Escape(commentSym)}\s*\*{{30}}\r?\n{Regex.Escape(commentSym)}\s*\* 11900-9403{xx} Program Start \*\r?\n{Regex.Escape(commentSym)}\s*\*{{30}}";
                 if (!Regex.IsMatch(code, specificPattern))
                 {
                     missingHeaders.Add(xx);
@@ -48,13 +53,13 @@ public static class CodeValidatorService
                 violations.Add(new Violation("Code Violation", 
                     $"Rule 5.1: Missing or incorrect program headers for question(s): {string.Join(", ", missingHeaders)}.\n" +
                     "Each question section must start with:\n" +
-                    "// ******************************\n" +
-                    "// * 11900-9403xx Program Start *\n" +
-                    "// ******************************"));
+                    $"{commentSym} ******************************\n" +
+                    $"{commentSym} * 11900-9403xx Program Start *\n" +
+                    $"{commentSym} ******************************"));
             }
 
             // 1. Rule: No 'Go To' (119003B14 Page 1, Rule 6.3)
-            var gotoMatch = Regex.Match(code, @"\bgoto\b", RegexOptions.IgnoreCase);
+            var gotoMatch = Regex.Match(codeWithoutComments, @"\bgoto\b", RegexOptions.IgnoreCase);
             if (gotoMatch.Success)
             {
                 int lineNo = code.Take(gotoMatch.Index).Count(c => c == '\n') + 1;
@@ -75,10 +80,9 @@ public static class CodeValidatorService
 
             foreach (var ns in suspiciousNamespaces)
             {
-                if (code.Contains(ns, StringComparison.OrdinalIgnoreCase))
+                if (codeWithoutComments.Contains(ns, StringComparison.OrdinalIgnoreCase))
                 {
-                    int lineNo = code.Substring(0, code.IndexOf(ns, StringComparison.OrdinalIgnoreCase)).Count(c => c == '\n') + 1;
-                    violations.Add(new Violation("Code Warning", $"Potential Rule 6.4 Violation: Using advanced namespace '{ns}' on line {lineNo}. Ensure only essential I/O functions are used."));
+                    violations.Add(new Violation("Code Warning", $"Potential Rule 6.4 Violation: Using advanced namespace '{ns}'. Ensure only essential I/O functions are used."));
                 }
             }
 
@@ -86,57 +90,49 @@ public static class CodeValidatorService
             string[] forbiddenMethods = [".Sort(", ".Reverse(", "Math.Max(", "Math.Min(", "Math.Sqrt(", "Math.Pow("];
             foreach (var method in forbiddenMethods)
             {
-                int index = code.IndexOf(method, StringComparison.OrdinalIgnoreCase);
-                if (index >= 0)
+                if (codeWithoutComments.Contains(method, StringComparison.OrdinalIgnoreCase))
                 {
-                    int lineNo = code.Substring(0, index).Count(c => c == '\n') + 1;
-                    violations.Add(new Violation("Code Violation", $"Rule 6.4: Prohibited built-in method '{method}' found on line {lineNo}. Algorithms must be implemented manually."));
+                    violations.Add(new Violation("Code Violation", $"Rule 6.4: Prohibited built-in method '{method}' found. Algorithms must be implemented manually."));
                 }
             }
 
 
             // 3. Rule: No mixed loop types and no direct result output (Page 1, Rules 6.1 & 6.2)
             // The test draws a loop type (for, while, do while), and they cannot be mixed.
-            bool hasFor = Regex.IsMatch(code, @"\bfor\b", RegexOptions.IgnoreCase);
+            bool hasFor = false;
             bool hasWhile = false;
-            bool hasDo = Regex.IsMatch(code, @"\bdo\b", RegexOptions.IgnoreCase);
+            bool hasDo = false;
 
             if (extension == ".cs")
             {
-                // In C#, while can be standalone or part of do-while.
-                // We count it as standalone if it's not preceded by '}' within a few chars (heuristic).
-                // Better: find all while and check if they are part of do-while.
-                var whileMatches = Regex.Matches(code, @"\bwhile\b", RegexOptions.IgnoreCase);
+                hasFor = Regex.IsMatch(codeWithoutComments, @"\bfor\b", RegexOptions.IgnoreCase);
+                hasDo = Regex.IsMatch(codeWithoutComments, @"\bdo\b", RegexOptions.IgnoreCase);
+
+                // Find all while and check if they are part of do-while.
+                var whileMatches = Regex.Matches(codeWithoutComments, @"\bwhile\b", RegexOptions.IgnoreCase);
                 foreach (Match m in whileMatches)
                 {
-                    // Look backwards for 'do' that isn't closed (simplified heuristic)
-                    string before = code.Substring(0, m.Index);
-                    if (!before.TrimEnd().EndsWith("}")) 
+                    string before = codeWithoutComments.Substring(0, m.Index);
+                    // Check if 'while' is preceded by '}' (end of do block)
+                    if (!Regex.IsMatch(before, @"\}\s*$", RegexOptions.IgnoreCase))
                     {
-                        // Check if it's potentially a standalone while(condition)
-                        if (Regex.IsMatch(before, @"\bdo\b\s*\{", RegexOptions.IgnoreCase | RegexOptions.RightToLeft))
-                        {
-                            // This while might be part of do-while. 
-                            // If we already have 'do' detected, we don't count this as a separate 'while' type.
-                        }
-                        else
-                        {
-                            hasWhile = true;
-                        }
+                        hasWhile = true;
                     }
                 }
             }
             else // .vb
             {
-                // VB: 'Do While', 'Do Until', 'While', 'For'
-                hasWhile = Regex.IsMatch(code, @"\bWhile\b", RegexOptions.IgnoreCase) && !Regex.IsMatch(code, @"\bDo\s+While\b", RegexOptions.IgnoreCase);
-                // Note: VB 'While' is distinct from 'Do While'
+                hasFor = Regex.IsMatch(codeWithoutComments, @"\bFor\b", RegexOptions.IgnoreCase);
+                hasWhile = Regex.IsMatch(codeWithoutComments, @"\bWhile\b", RegexOptions.IgnoreCase) || Regex.IsMatch(codeWithoutComments, @"\bDo\s+While\b", RegexOptions.IgnoreCase);
+                hasDo = Regex.IsMatch(codeWithoutComments, @"\bDo\b", RegexOptions.IgnoreCase) && !Regex.IsMatch(codeWithoutComments, @"\bDo\s+While\b", RegexOptions.IgnoreCase);
             }
+
 
             var usedLoops = new List<string>();
             if (hasFor) usedLoops.Add("for");
             if (hasWhile) usedLoops.Add("while");
             if (hasDo) usedLoops.Add("do");
+
 
             // Check against expected loop type
             if (usedLoops.Count > 0)
