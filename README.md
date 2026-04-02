@@ -1,6 +1,6 @@
-# 11900 電腦軟體設計丙級 - 自動化測試系統 (V2.0)
+# 11900 電腦軟體設計丙級 - 自動化測試系統 (V2.1)
 
-本專案提供針對「電腦軟體設計丙級」試題的現代化自動化檢測工具。透過 **Roslyn 語義分析** 與 **FlaUI 組件化架構**，為應試人提供工業級的程式碼品質檢查與 UI 佈局驗證。支援 **C#** 與 **VB.NET** 雙語言版本。
+本專案提供針對「電腦軟體設計丙級」試題的現代化自動化檢測工具。透過 **Roslyn 語義分析** 與 **FlaUI 穩定強化架構**，為應試人提供工業級的程式碼品質檢查與 UI 邏輯驗證。支援 **C#** 與 **VB.NET** 雙語言版本。
 
 ## 專案結構
 
@@ -11,10 +11,10 @@
 - `/Test`: 自動化測試工具集
   - `TestLauncher`: 視覺化測試啟動器 (WinForm GUI)。
   - `Task1Tester`: 第一站專屬測試專案 (含 Roslyn 代碼分析、PDF 內容提取與比對)。
-  - `WinFormUITester`: 第二站專屬 UI 自動化測試專案 (基於 FlaUI POM 組件架構)。
+  - `WinFormUITester`: 第二站專屬 UI 自動化測試專案 (基於強化型 POM 組件架構)。
 - `/TestReports`: (自動生成) 存放 HTML 格式的測試詳細報告。
 
-## 核心技術優化 (V2.0 更新內容)
+## 核心技術優化 (V2.1 更新內容)
 
 ### 1. Roslyn 語義檢查器 (`CodeValidatorService`)
 不再依賴脆弱的正則表達式 (Regex)，改用 **Microsoft.CodeAnalysis (Roslyn)** 語法樹分析：
@@ -22,27 +22,24 @@
 - **違規偵測**：精確鎖定 `goto` 使用、禁用函式呼叫 (如 `Array.Sort`, `Math.Max`) 以及混用迴圈類型。
 - **行號回報**：報告中會直接指出違反規則的具體行號，方便考生快速修正。
 
-### 2. 組件化 UI 測試架構 (POM Components)
-重構 `WinFormUITester` 為組件化設計，提升測試穩定性：
-- **`OpenFileDialogComponent`**：穩定處理 Windows 標準開啟檔案對話框，內建 Retry 等待機制。
-- **`CandidateInfoComponent`**：採用標籤相對定位演算法，自動驗證考生資料區塊。
-- **移除 Thread.Sleep**：全面改用異步等待 (Retry)，大幅提升測試執行效率與環境適應力。
+### 2. 強化型 UI 測試架構 (Stable POM)
+針對 Windows 不同環境下的 UI 樹變異進行了穩定性強化：
+- **自動降級比對機制**：若 UIA3 驅動程式無法獲取 DataGridView 標題 (Header)，系統會自動輸出警告並跳過標題檢查，優先確保核心「資料列邏輯」的比對。
+- **相對定位演算法**：應檢人資料 (姓名、編號) 採用「標籤-控制項」相對座標搜尋，徹底解決 AutomationId 變動導致的定位失敗。
+- **跨進程安全搜尋**：尋找視窗時採用 `ProcessId` 與 `ControlType` 雙重過濾，確保在多視窗環境下精確鎖定目標。
 
-### 3. 失敗截圖與診斷機制
-當 UI 測試失敗或驗證不符時，系統會自動執行以下動作：
-- **自動截圖**：於失敗瞬間捕捉當前視窗畫面，存檔於 `Screenshots/` 目錄。
-- **現場保留**：保留失敗時的 UI 狀態，配合截圖讓應檢人能直觀發現「標題錯字」或「欄位遺漏」。
+### 3. 資料清洗與 Null 安全
+- **(null) 標記處理**：自動將 DataGridView 中的 `(null)` 預設字串轉換為空字串，確保與檢定手冊邏輯一致。
+- **編譯級 Null 安全**：全面修復 C# 10 可為 Null 參考型別警告，提升測試工具本身的健壯性。
 
-### 4. HTML 視覺化測試報告
-測試執行完畢後，將自動產出美觀的 HTML 報告：
-- **第一站報告**：整合 PDF 標題、內容比對結果與程式碼違規明細。
-- **第二站報告**：整合 xUnit 測試結果，包含每個測試案例的耗時與詳細錯誤堆疊。
-- **存放位置**：統一存放於根目錄之 `/TestReports` 資料夾。
+### 4. 自動化診斷與報告
+- **失敗瞬間截圖**：測試失敗時自動捕捉現場畫面，存檔於 `Screenshots/`。
+- **HTML 視覺化報告**：整合測試結果、耗時與錯誤明細，產出美觀的驗證清單。
 
 ## 快速開始
 
 ### 1. 配置測試環境
-編輯 `Test/WinFormUITester/testsettings.json` 以調整預設的考生資訊與執行檔路徑：
+編輯 `Test/WinFormUITester/testsettings.json` 以調整執行檔路徑：
 ```json
 {
   "DefaultCandidate": { "Name": "陳宇威", "TestNo": "112590005", "SeatNo": "005" },
@@ -50,22 +47,15 @@
 }
 ```
 
-### 2. 執行啟動器 (GUI)
-```powershell
-dotnet run --project Test/TestLauncher/TestLauncher.csproj
-```
-
-### 3. 命令列執行 (CLI)
-若需單獨測試第一站：
-```powershell
-dotnet run --project Test/Task1Tester/Task1Tester/Task1Tester.csproj -- <code_path> <user_pdf_path> <ans_pdf_path> <name> <test_no> <seat_no> <loop_type> [report_path]
-```
+### 2. 執行方式
+- **視覺化 (推薦)**：執行 `Test/TestLauncher/bin/Debug/net10.0-windows/TestLauncher.exe`。
+- **命令列**：`dotnet test Test/WinFormUITester/WinFormUITester.csproj --logger "html"`。
 
 ## 注意事項
-- **Git 忽略**：測試產出的 `TestReports/` 與 `Screenshots/` 已加入 `.gitignore`，不會被上傳。
 - **環境要求**：需安裝 .NET 10 SDK。
 - **UI 測試**：執行期間請勿操作滑鼠鍵盤，以免干擾自動化流程。
+- **Git 忽略**：測試產出的 `TestReports/` 與 `Screenshots/` 已加入 `.gitignore`。
 
 ---
-產出工具：Gemini CLI 測試自動化套件 (V2.0)
-更新日期：2026/04/02
+產出工具：Gemini CLI 測試自動化套件 (V2.1)
+更新日期：2026/04/03

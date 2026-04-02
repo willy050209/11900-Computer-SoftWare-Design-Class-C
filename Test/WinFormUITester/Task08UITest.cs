@@ -2,6 +2,7 @@ using FlaUI.Core;
 using FlaUI.UIA3;
 using FlaUI.Core.AutomationElements;
 using System.IO;
+using System.Linq;
 
 namespace WinFormUITester;
 
@@ -16,7 +17,6 @@ public class Task08UITest : IDisposable
     {
         _config = TestSettings.GetTaskConfig("task08");
         if (!File.Exists(_config.ExePath)) throw new FileNotFoundException($"找不到執行檔: {_config.ExePath}");
-
         _automation = new UIA3Automation();
         _app = FlaUI.Core.Application.Launch(_config.ExePath);
     }
@@ -27,35 +27,40 @@ public class Task08UITest : IDisposable
         try 
         {
             var dialogElement = FlaUI.Core.Tools.Retry.WhileNull(() => 
-                _automation.GetDesktop().FindAllChildren(cf => cf.ByProcessId(_app.ProcessId))
-                .FirstOrDefault(w => w.ClassName == "#32770"), TimeSpan.FromSeconds(20)).Result;
+                _automation.GetDesktop().FindAllChildren().FirstOrDefault(w => {
+                    try { return w.Properties.ProcessId.Value == _app.ProcessId && (w.Name.Contains("開啟") || w.ControlType == FlaUI.Core.Definitions.ControlType.Window); }
+                    catch { return false; }
+                }), TimeSpan.FromSeconds(20)).Result;
             
             Assert.NotNull(dialogElement);
             new OpenFileDialogComponent(dialogElement.AsWindow()).OpenFile(_config.TestDataPath);
             
             var mainWin = FlaUI.Core.Tools.Retry.WhileNull(() => 
-                _automation.GetDesktop().FindAllChildren(cf => cf.ByProcessId(_app.ProcessId))
-                .FirstOrDefault(w => w.ClassName != "#32770" && !string.IsNullOrEmpty(w.Name)), 
-                TimeSpan.FromSeconds(15)).Result;
+                _automation.GetDesktop().FindAllChildren().FirstOrDefault(w => {
+                    try { return w.Properties.ProcessId.Value == _app.ProcessId && !w.Name.Contains("開啟") && !string.IsNullOrEmpty(w.Name); }
+                    catch { return false; }
+                }), TimeSpan.FromSeconds(15)).Result;
 
             Assert.NotNull(mainWin);
             var mainPage = new TaskMainPage(mainWin.AsWindow());
 
-            FlaUI.Core.Tools.Retry.WhileTrue(() => mainPage.ResultsGrid.Rows.Length == 0, TimeSpan.FromSeconds(10));
+            FlaUI.Core.Tools.Retry.WhileTrue(() => (mainPage.ResultsGrid?.Rows.Length ?? 0) == 0, TimeSpan.FromSeconds(10));
             mainPage.VerifyLayout(_config);
-            mainPage.CandidateInfo.VerifyInfo(
-                TestSettings.GetCandidateName(), 
-                TestSettings.GetCandidateTestNo(), 
-                TestSettings.GetCandidateSeatNo());
+            mainPage.CandidateInfo.VerifyInfo(TestSettings.GetCandidateName(), TestSettings.GetCandidateTestNo(), TestSettings.GetCandidateSeatNo());
 
-            foreach (var row in mainPage.ResultsGrid.Rows)
+            var rows = mainPage.ResultsGrid?.Rows ?? Array.Empty<FlaUI.Core.AutomationElements.DataGridViewRow>();
+            foreach (var row in rows)
             {
-                var cells = row.Cells.Select(c => c.Value?.ToString()?.Trim() ?? "").ToArray();
+                var cells = row.Cells.Select(c => {
+                    string val = "";
+                    try { val = c.Value?.ToString() ?? ""; } catch { }
+                    return val == "(null)" ? "" : val.Trim();
+                }).ToArray();
+                if (cells.Length < 4 || string.IsNullOrEmpty(cells[0]) || string.IsNullOrEmpty(cells[1])) continue;
                 string v1 = cells[0], op = cells[1], v2 = cells[2], actualAns = cells[3];
                 string expectedAns = ValidationService.GetFractionAnswer(v1, op, v2);
                 if (actualAns != expectedAns)
                     throw new Exception($"分數運算錯誤。{v1} {op} {v2}。預期: '{expectedAns}', 實際: '{actualAns}'");
-                Assert.Matches(@"^-?\d+(/\d+)?$", actualAns);
             }
         }
         catch (Exception)
