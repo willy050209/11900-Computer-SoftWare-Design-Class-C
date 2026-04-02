@@ -1,4 +1,5 @@
 // filepath: Views/MainForm.cs
+#nullable enable
 using System.Text;
 using TestLauncher.Models;
 using TestLauncher.Presenters;
@@ -134,17 +135,20 @@ public partial class MainForm : Form, IMainView
     public void UpdateLocalizedText(Func<string, string> getStr)
     {
         this.Text = getStr("Title");
-        lblLanguage.Text = getStr("Language");
+        menuLanguage.Text = getStr("Language");
         tabTask1.Text = getStr("Task1Tab");
         tabTask2.Text = getStr("Task2Tab");
+
+        // Common Candidate Info
+        grpCommonCandidate.Text = getStr("CandidateGroup");
+        UpdateControlText("lblName", getStr("Name"));
+        UpdateControlText("lblTestNo", getStr("TestNo"));
+        UpdateControlText("lblSeatNo", getStr("SeatNo"));
 
         // Task 1
         UpdateControlText("lblCodePath", getStr("CodePath"));
         UpdateControlText("lblUserPdf", getStr("UserPdf"));
         UpdateControlText("lblAnsPdf", getStr("AnsPdf"));
-        UpdateControlText("lblName", getStr("Name"));
-        UpdateControlText("lblTestNo", getStr("TestNo"));
-        UpdateControlText("lblSeatNo", getStr("SeatNo"));
         UpdateControlText("lblLoopType", getStr("LoopType"));
         btnRunT1.Text = getStr("RunTask1");
 
@@ -168,12 +172,12 @@ public partial class MainForm : Form, IMainView
         if (controls.Length > 0) controls[0].Text = text;
     }
 
-    private async void btnRunT1_Click(object sender, EventArgs e) => await _presenter.RunTask1Async();
-    private async void btnRunT06_Click(object sender, EventArgs e) => await _presenter.RunTask2Async("task06");
-    private async void btnRunT07_Click(object sender, EventArgs e) => await _presenter.RunTask2Async("task07");
-    private async void btnRunT08_Click(object sender, EventArgs e) => await _presenter.RunTask2Async("task08");
+    private async void btnRunT1_Click(object? sender, EventArgs e) => await _presenter.RunTask1Async();
+    private async void btnRunT06_Click(object? sender, EventArgs e) => await _presenter.RunTask2Async("task06");
+    private async void btnRunT07_Click(object? sender, EventArgs e) => await _presenter.RunTask2Async("task07");
+    private async void btnRunT08_Click(object? sender, EventArgs e) => await _presenter.RunTask2Async("task08");
 
-    private void btnBrowse_Click(object sender, EventArgs e)
+    private void btnBrowse_Click(object? sender, EventArgs e)
     {
         if (sender is Button btn && btn.Tag is TextBox target)
         {
@@ -188,9 +192,8 @@ public partial class MainForm : Form, IMainView
         }
     }
 
-    private void cmbLanguage_SelectedIndexChanged(object sender, EventArgs e)
+    private void OnLanguageMenuClick(Language lang)
     {
-        Language lang = cmbLanguage.SelectedIndex == 0 ? Language.TraditionalChinese : Language.English;
         _presenter.ChangeLanguage(lang);
     }
 }

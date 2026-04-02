@@ -40,6 +40,7 @@ public class LocalizationService
         "RunT07" => "Run T07",
         "RunT08" => "Run T08",
         "Language" => "Language:",
+        "CandidateGroup" => "Candidate Information",
         _ => key
     };
 
@@ -62,6 +63,7 @@ public class LocalizationService
         "RunT07" => "執行 07",
         "RunT08" => "執行 08",
         "Language" => "語言:",
+        "CandidateGroup" => "應檢人資料",
         _ => key
     };
 }
