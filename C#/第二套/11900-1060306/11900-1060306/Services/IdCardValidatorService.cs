@@ -52,12 +52,7 @@ public class IdCardValidatorService : IIdCardValidatorService
 
     private static bool IsValidFormat(string id)
     {
-        if (id.Length != 10) return false;
-        if (!char.IsAsciiLetterUpper(id[0])) return false;
-        foreach(var c in id[1..])
-        {
-            if (!char.IsDigit(c)) return false;
-        }
+        if (id.Length != 10 || !char.IsAsciiLetterUpper(id[0]) || !id[1..].All(char.IsDigit)) return false;
         return true;
     }
 
