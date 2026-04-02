@@ -51,6 +51,16 @@
 - **視覺化 (推薦)**：執行 `Test/TestLauncher/bin/Debug/net10.0-windows/TestLauncher.exe`。
 - **命令列**：`dotnet test Test/WinFormUITester/WinFormUITester.csproj --logger "html"`。
 
+## 發佈與部署 (發佈模式)
+
+本專案提供 `publish.bat` 批次檔，可一鍵將測試工具打包為獨立的分發套件，方便部署至檢定場地或學生電腦。
+
+### 部署步驟：
+1. **執行批次檔**：在專案根目錄按兩下執行 `publish.bat`。
+2. **自動化編譯**：系統會自動編譯 `TestLauncher`、`Task1Tester` 與 `WinFormUITester` 並將其轉換為 Release 執行檔。
+3. **打包產出**：打包後的完整工具會存放在根目錄的 `dist/` 資料夾下。
+4. **分發**：直接將整個 `dist/` 目錄壓縮並發送給應檢人即可使用。
+
 ## 注意事項
 - **環境要求**：需安裝 .NET 10 SDK。
 - **UI 測試**：執行期間請勿操作滑鼠鍵盤，以免干擾自動化流程。
