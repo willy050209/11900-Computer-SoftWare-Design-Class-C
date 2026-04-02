@@ -125,20 +125,43 @@ public class MainFormPage
         }
 
         // 4. 驗證 DataGridView 欄位標題
-        var header = ResultsGrid.FindFirstChild(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.Header));
+        var grid = ResultsGrid;
+        List<string> headerItems = new List<string>();
+        
+        var header = grid.Header;
         if (header != null)
         {
-            var headerItems = header.FindAllChildren(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.HeaderItem))
-                                    .Select(x => x.Name).Where(name => !string.IsNullOrWhiteSpace(name) && name != "Top Left Header Cell").ToList();
-            
-            for (int i = 0; i < expectedColumns.Length; i++)
+            headerItems = header.FindAllChildren(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.HeaderItem))
+                                .Select(x => x.Name)
+                                .Where(n => !string.IsNullOrWhiteSpace(n) && n != "Top Left Header Cell")
+                                .ToList();
+        }
+
+        if (headerItems.Count == 0)
+        {
+            // 備援方案：從所有子代中找
+            headerItems = grid.FindAllDescendants(cf => cf.ByControlType(FlaUI.Core.Definitions.ControlType.HeaderItem))
+                              .Select(x => x.Name)
+                              .Where(n => !string.IsNullOrWhiteSpace(n) && n != "Top Left Header Cell")
+                              .ToList();
+        }
+
+        // 如果數量不符
+        if (headerItems.Count < expectedColumns.Length)
+        {
+             throw new Exception($"DataGridView 欄位數量不足。預期至少 {expectedColumns.Length} 欄，實際偵測到 {headerItems.Count} 欄 (偵測值: {string.Join(", ", headerItems)})");
+        }
+
+        for (int i = 0; i < expectedColumns.Length; i++)
+        {
+            if (headerItems[i].Trim() != expectedColumns[i].Trim())
             {
-                if (i >= headerItems.Count || headerItems[i] != expectedColumns[i])
-                {
-                    throw new Exception($"DataGridView 欄位不符。預期第 {i} 欄為 '{expectedColumns[i]}'，實際為 '{(i < headerItems.Count ? headerItems[i] : "null")}'");
-                }
+                throw new Exception($"DataGridView 欄位不符。預期第 {i + 1} 欄為 '{expectedColumns[i]}'，實際為 '{headerItems[i]}'");
             }
         }
+
+
+
     }
 
     public void VerifyData(Action<string[]> rowValidator)
