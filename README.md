@@ -1,4 +1,4 @@
-# 11900 電腦軟設計丙級 - 自動化測試系統
+# 11900 電腦軟體設計丙級 - 自動化測試系統
 
 本專案提供針對「電腦軟體設計丙級」試題的自動化檢測工具，旨在協助應試人確認程式碼邏輯與輸出結果是否符合評分標準。
 
@@ -6,55 +6,58 @@
 
 - `/C#`: 包含考生開發的術科程式原始碼。
   - `第一站`: 術科第一題至第五題。
-  - `第二套`: 術科第二套試題（1060306, 1060307, 1060308）。
+  - `第二套`: 術科第二套試題 (1060306, 1060307, 1060308)。
 - `/Test`: 自動化測試工具集
-  - `Task1Tester`: 術科第一站專屬自動化測試專案（含程式碼規範與 PDF 頁首校驗）。
-  - `WinFormUITester`: 術科第二套專屬 UI 自動化測試專案（基於 FlaUI）。
+  - `TestLauncher`: **[New]** 視覺化測試啟動器 (WinForm GUI)。
+  - `Task1Tester`: 術科第一站專屬自動化測試專案 (含程式碼規範與 PDF 頁首校驗)。
+  - `WinFormUITester`: 術科第二套專屬 UI 自動化測試專案 (基於 FlaUI)。
 - `ans.pdf`: 術科測試參考答案 PDF。
 - `119003B14.pdf`: 術科測試應試人參考資料。
 
-## 已完成試題 (第二套)
+## 視覺化測試工具 (TestLauncher)
 
-### 11900-1060306 身分證號碼檢查
-- **核心功能**: 實作身分證字號格式、性別代碼及檢查碼(Checksum)驗證。
-- **特點**: 採用 MVP 架構，自動讀取 SM/T01 檔案並依 ID 升冪排序。
+為了方便應試人使用，本專案提供了一個視覺化的啟動器介面，整合了所有自動化測試功能。
 
-### 11900-1060307 撲克牌比大小
-- **核心功能**: 模擬發牌程式，判定玩家與莊家勝負。
-- **特點**: 嚴格執行「同一張牌不可發出兩次」規則，使用隨機數對應 52 張牌。
+### 核心功能：
+- **一鍵執行**：整合第一站與第二套所有測試項目。
+- **多語系支援**：提供「繁體中文」與「English」介面切換。
+- **彩色 Log 輸出**：仿 PowerShell 風格的彩色 Log，綠色代表成功、紅色代表失敗、青色代表執行指令。
+- **路徑自動推算**：自動偵測專案結構並填入預設執行路徑與測試資料路徑。
+- **UTF-8 相容**：完整支援中文路徑與內容，無亂碼問題。
 
-### 11900-1060308 分數加減乘除運算
-- **核心功能**: 分數的四則運算。
-- **特點**: 自動約分為最簡分數，若結果為整數則自動轉換格式。
+### 執行方式：
+在專案根目錄執行：
+```powershell
+dotnet run --project Test/TestLauncher/TestLauncher.csproj
+```
 
-## 測試工具說明
+---
+
+## 測試工具說明 (命令列介面)
 
 ### 1. 術科第一站自動化測試 (Task1Tester)
 用於驗證 940301~940305 的演算法邏輯與 PDF 輸出格式。
 
 #### 執行方式：
-在 `Test/Task1Tester/Task1Tester` 目錄下執行：
 ```powershell
-dotnet run -- <code_path> <user_pdf_path> <ans_pdf_path> <name> <test_no> <seat_no> <loop_type>
+dotnet run --project Test/Task1Tester/Task1Tester/Task1Tester.csproj -- <code_path> <user_pdf_path> <ans_pdf_path> <name> <test_no> <seat_no> <loop_type>
 ```
 
 ### 2. 術科第二套 UI 自動化測試 (WinFormUITester)
-使用 FlaUI 模擬真實使用者操作，驗證 1060306~1060308 的 UI 互動、檔案讀取與資料呈現。
+使用 FlaUI 模擬真實使用者操作，驗證 1060306~1060308 的 UI 互動與資料呈現。
 
 #### 核心特點：
-- **強健的對話框處理**：自動處理程式啟動時彈出的 `OpenFileDialog`。
-- **精準聚焦技術**：使用 `Alt+N` 快捷鍵強制聚焦檔名輸入框，避免因焦點遺失導致的輸入失敗。
-- **多重輸入備援**：優先使用 UIA `ValuePattern` 填寫路徑，並以鍵盤模擬作為備援，確保 100% 自動化成功率。
-- **非同步載入等待**：內建智慧重試與緩衝機制，適應不同效能環境下的資料載入時間。
+- **動態參數支援**：可透過 args 自訂待測程式與資料檔案路徑。
+- **強健的對話框處理**：自動填寫 `OpenFileDialog`。
+- **精準聚焦技術**：使用 `Alt+N` 快捷鍵強制聚焦。
 
 #### 執行方式：
-在專案根目錄或 `Test/WinFormUITester` 目錄下執行：
 ```powershell
-# 執行所有 UI 測試
+# 執行所有 UI 測試 (使用預設路徑)
 dotnet test Test/WinFormUITester/WinFormUITester.csproj
 
-# 執行特定題目測試 (例如 1060306)
-dotnet test Test/WinFormUITester/WinFormUITester.csproj --filter FullyQualifiedName=WinFormUITester.Task06UITest
+# 指定特定執行檔與資料進行測試
+dotnet test Test/WinFormUITester/WinFormUITester.csproj --filter Task06 -- --task06-exe "C:\Path\To\App.exe" --task06-data "C:\Path\To\Data.SM"
 ```
 
 ## 測試規範 (依據 119003B14 規定)
@@ -62,21 +65,13 @@ dotnet test Test/WinFormUITester/WinFormUITester.csproj --filter FullyQualifiedN
 ### 程式碼檢查 (Code Validation)
 - **規則 6.2**: 禁止直接輸出結果。系統會偵測程式碼是否缺乏迴圈或判斷結構。
 - **規則 6.3**: 禁止使用 `Go To` 指令。
-- **規則 6.4**: 禁止使用輸入、輸出及轉換以外的內建系統函數（如 `Math.Sqrt`, `Array.Sort` 等，演算法需手動實作）。
+- **規則 6.4**: 禁止使用內置演算法函數 (如 `Math.Sqrt`, `Array.Sort` 等)。
 
 ### PDF 輸出檢查 (PDF Validation)
-- **頁首校驗**: 包含姓名、術科測試編號、座號，以及**民國格式日期** (`yyy/mm/dd`)。
+- **頁首校驗**: 姓名、術科測試編號、座號，以及**民國格式日期** (`yyy/mm/dd`)。
 - **內容校驗**: 比對第一題至第五題的結果文字是否與標準答案一致。
-
-## 進階測試規範 (針對第一站)
-
-### 程式碼檢查 (Code Validation)
-- **規則 5.1**: 程式碼中必須**同時包含** 01 至 05 五題的所有標頭註解區塊。
-- **規則 6.1 & 6.2**: **禁止混用迴圈類型**。系統會驗證程式碼是否僅使用了指定抽中的迴圈類型 (`for`, `while`, 或 `do-while`)。
-- **規則 6.4**: 禁止使用內建演算法函數。系統會顯示違規行號供快速修正。
 
 ## 注意事項
 - 請確保系統已安裝 .NET 10 SDK。
 - UI 測試執行期間，請勿操作滑鼠或鍵盤，以免干擾自動化流程。
-- PDF 處理採用 iText 7 (9.x) 與 Bouncy Castle。
-- 測試工具會自動處理 C# 與 VB.NET 的語法差異與 BOM 編碼。
+- 本工具僅供自我檢測參考，實際評分以監評人員為準。
