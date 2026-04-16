@@ -13,6 +13,7 @@
     <Window.Resources>
         <conv:ReviewOptionColorConverter x:Key="ReviewColorConverter"/>
         <conv:ReviewOptionForegroundConverter x:Key="ReviewForegroundConverter"/>
+        <conv:BoolToVisibilityConverter x:Key="BoolToVis"/>
     </Window.Resources>
 
     <Grid Margin="20" RowDefinitions="Auto, *">
@@ -90,10 +91,10 @@
 
             <!-- Review View -->
             <Grid IsVisible="{Binding CurrentState, Converter={StaticResource EqualsConverter}, ConverterParameter={x:Static vm:AppState.Review}}"
-                  RowDefinitions="Auto, *, Auto">
+                  RowDefinitions="Auto, *" ColumnDefinitions="200, *">
                 
                 <!-- Header -->
-                <Grid Grid.Row="0" ColumnDefinitions="*, Auto" Margin="0,0,0,20">
+                <Grid Grid.Row="0" Grid.ColumnSpan="2" ColumnDefinitions="*, Auto" Margin="0,0,0,20">
                     <StackPanel>
                         <TextBlock Text="題目回顧模式" FontSize="14" Foreground="#FF9800" FontWeight="Bold"/>
                         <TextBlock FontSize="18" FontWeight="SemiBold">
@@ -108,8 +109,47 @@
                             Background="{DynamicResource SystemControlForegroundBaseMediumBrush}" Foreground="White" VerticalAlignment="Center"/>
                 </Grid>
 
+                <!-- Navigation Sidebar -->
+                <Border Grid.Row="1" Grid.Column="0" Background="{DynamicResource SystemControlBackgroundAltHighBrush}" 
+                        BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="0,0,1,0" Padding="0,0,10,0">
+                    <ListBox ItemsSource="{Binding TestItems}" 
+                             SelectedIndex="{Binding CurrentQuestionIndex, Mode=TwoWay}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate x:DataType="models:TestItem">
+                                <Border Padding="5">
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <TextBlock Text="{Binding $parent[ListBox].((vm:MainViewModel)DataContext).TestItems, Converter={StaticResource IndexToDisplayConverter}, ConverterParameter={Binding}}"
+                                                   Width="30" VerticalAlignment="Center"/>
+                                        <Panel VerticalAlignment="Center">
+                                            <TextBlock Text="✅" IsVisible="{Binding IsCorrect}" Foreground="#2E7D32"/>
+                                            
+                                            <!-- Logic for Incorrect: IsAnswered=True AND IsCorrect=False -->
+                                            <TextBlock Text="❌" Foreground="#C62828">
+                                                <TextBlock.IsVisible>
+                                                    <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                                        <Binding Path="IsAnswered" />
+                                                        <Binding Path="IsCorrect" Converter="{StaticResource BoolToVis}" ConverterParameter="invert" />
+                                                    </MultiBinding>
+                                                </TextBlock.IsVisible>
+                                            </TextBlock>
+                                            
+                                            <!-- Logic for Unanswered: IsAnswered=False -->
+                                            <TextBlock Text="⚪" IsVisible="{Binding IsAnswered, Converter={StaticResource BoolToVis}, ConverterParameter=invert}" Foreground="#9E9E9E"/>
+                                        </Panel>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                        <ListBox.Styles>
+                            <Style Selector="ListBoxItem">
+                                <Setter Property="Padding" Value="2"/>
+                            </Style>
+                        </ListBox.Styles>
+                    </ListBox>
+                </Border>
+
                 <!-- Question Area -->
-                <ScrollViewer Grid.Row="1">
+                <ScrollViewer Grid.Row="1" Grid.Column="1" Padding="20,0,0,0">
                     <StackPanel Spacing="20">
                         <TextBlock Text="{Binding CurrentQuestion.OriginalQuestion.Question}" FontSize="20" TextWrapping="Wrap"/>
                         
@@ -140,7 +180,17 @@
                         <Border Padding="15" CornerRadius="8" Margin="0,10,0,0">
                             <StackPanel Orientation="Horizontal" Spacing="10">
                                 <TextBlock Text="✅ 這題答對了！" IsVisible="{Binding CurrentQuestion.IsCorrect}" Foreground="#2E7D32" FontWeight="Bold" FontSize="18"/>
-                                <TextBlock Text="❌ 這題答錯了。" IsVisible="{Binding !CurrentQuestion.IsCorrect}" Foreground="#C62828" FontWeight="Bold" FontSize="18"/>
+                                
+                                <TextBlock Text="❌ 這題答錯了。" Foreground="#C62828" FontWeight="Bold" FontSize="18">
+                                    <TextBlock.IsVisible>
+                                        <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                            <Binding Path="CurrentQuestion.IsAnswered" />
+                                            <Binding Path="CurrentQuestion.IsCorrect" Converter="{StaticResource BoolToVis}" ConverterParameter="invert" />
+                                        </MultiBinding>
+                                    </TextBlock.IsVisible>
+                                </TextBlock>
+                                
+                                <TextBlock Text="⚪ 您沒有回答這題。" IsVisible="{Binding CurrentQuestion.IsAnswered, Converter={StaticResource BoolToVis}, ConverterParameter=invert}" Foreground="#9E9E9E" FontWeight="Bold" FontSize="18"/>
                             </StackPanel>
                         </Border>
                     </StackPanel>
