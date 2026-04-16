@@ -9,7 +9,7 @@
         x:Class="SubjectTestSystem.Desktop.MainWindow"
         x:DataType="vm:MainViewModel"
         Title="學科檢定模擬系統"
-        Icon="/Assets/icon.jpg">
+        Icon="avares://SubjectTestSystem.Desktop/Assets/icon.jpg">
 
     <Window.Resources>
         <conv:ReviewOptionColorConverter x:Key="ReviewColorConverter"/>
