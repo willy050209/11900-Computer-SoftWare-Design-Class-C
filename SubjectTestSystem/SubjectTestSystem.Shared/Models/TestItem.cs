@@ -18,6 +18,7 @@ public partial class TestItem : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(SelectedOption))]
+    [NotifyPropertyChangedFor(nameof(IsCorrect))]
     private int _selectedOptionIndex = -1;
 
     public OptionItem? SelectedOption => (SelectedOptionIndex >= 0 && SelectedOptionIndex < ShuffledOptions.Length)

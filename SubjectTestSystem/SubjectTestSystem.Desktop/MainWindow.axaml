@@ -4,10 +4,16 @@
         xmlns:models="using:SubjectTestSystem.Shared.Models"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:conv="using:SubjectTestSystem.Desktop.Converters"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
         x:Class="SubjectTestSystem.Desktop.MainWindow"
         x:DataType="vm:MainViewModel"
         Title="學科檢定模擬系統">
+
+    <Window.Resources>
+        <conv:ReviewOptionColorConverter x:Key="ReviewColorConverter"/>
+        <conv:ReviewOptionForegroundConverter x:Key="ReviewForegroundConverter"/>
+    </Window.Resources>
 
     <Grid Margin="20" RowDefinitions="Auto, *">
         <!-- Error Bar -->
@@ -56,16 +62,14 @@
                         <TextBlock Text="{Binding CurrentQuestion.OriginalQuestion.Question}" FontSize="20" TextWrapping="Wrap"/>
                         
                         <ListBox ItemsSource="{Binding CurrentQuestion.ShuffledOptions}"
-                                 SelectedIndex="{Binding CurrentQuestion.SelectedOptionIndex, Mode=OneWay}"
+                                 SelectedIndex="{Binding CurrentQuestion.SelectedOptionIndex, Mode=TwoWay}"
                                  Background="Transparent">
 
                             <ListBox.ItemTemplate>
                                 <DataTemplate x:DataType="models:OptionItem">
                                     <RadioButton Margin="0,5"
-                                                 IsChecked="{Binding $parent[ListBoxItem].IsSelected, Mode=OneWay}"
-                                                 Content="{Binding Text}"
-                                                 Command="{Binding $parent[vm:MainViewModel].SelectOptionCommand}"
-                                                 CommandParameter="{Binding}"/>
+                                                 IsChecked="{Binding $parent[ListBoxItem].IsSelected, Mode=TwoWay}"
+                                                 Content="{Binding Text}"/>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                             <ListBox.Styles>
@@ -84,6 +88,71 @@
                 </StackPanel>
             </Grid>
 
+            <!-- Review View -->
+            <Grid IsVisible="{Binding CurrentState, Converter={StaticResource EqualsConverter}, ConverterParameter={x:Static vm:AppState.Review}}"
+                  RowDefinitions="Auto, *, Auto">
+                
+                <!-- Header -->
+                <Grid Grid.Row="0" ColumnDefinitions="*, Auto" Margin="0,0,0,20">
+                    <StackPanel>
+                        <TextBlock Text="題目回顧模式" FontSize="14" Foreground="#FF9800" FontWeight="Bold"/>
+                        <TextBlock FontSize="18" FontWeight="SemiBold">
+                            <Run Text="第"/>
+                            <Run Text="{Binding CurrentQuestionIndex, Converter={StaticResource IndexToDisplayConverter}}"/>
+                            <Run Text="題 / 共"/>
+                            <Run Text="{Binding TestItems.Count}"/>
+                            <Run Text="題"/>
+                        </TextBlock>
+                    </StackPanel>
+                    <Button Grid.Column="1" Content="結束回顧" Command="{Binding BackToHomeCommand}" 
+                            Background="{DynamicResource SystemControlForegroundBaseMediumBrush}" Foreground="White" VerticalAlignment="Center"/>
+                </Grid>
+
+                <!-- Question Area -->
+                <ScrollViewer Grid.Row="1">
+                    <StackPanel Spacing="20">
+                        <TextBlock Text="{Binding CurrentQuestion.OriginalQuestion.Question}" FontSize="20" TextWrapping="Wrap"/>
+                        
+                        <ItemsControl ItemsSource="{Binding CurrentQuestion.ShuffledOptions}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="models:OptionItem">
+                                    <Border Margin="0,5" Padding="15,10" CornerRadius="5">
+                                        <Border.Background>
+                                            <MultiBinding Converter="{StaticResource ReviewColorConverter}">
+                                                <Binding Path="." />
+                                                <Binding Path="$parent[ItemsControl].DataContext" />
+                                            </MultiBinding>
+                                        </Border.Background>
+                                        <TextBlock Text="{Binding Text}" VerticalAlignment="Center">
+                                            <TextBlock.Foreground>
+                                                <MultiBinding Converter="{StaticResource ReviewForegroundConverter}">
+                                                    <Binding Path="." />
+                                                    <Binding Path="$parent[ItemsControl].DataContext" />
+                                                </MultiBinding>
+                                            </TextBlock.Foreground>
+                                        </TextBlock>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        
+                        <!-- Correct/Wrong summary for this question -->
+                        <Border Padding="15" CornerRadius="8" Margin="0,10,0,0">
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <TextBlock Text="✅ 這題答對了！" IsVisible="{Binding CurrentQuestion.IsCorrect}" Foreground="#2E7D32" FontWeight="Bold" FontSize="18"/>
+                                <TextBlock Text="❌ 這題答錯了。" IsVisible="{Binding !CurrentQuestion.IsCorrect}" Foreground="#C62828" FontWeight="Bold" FontSize="18"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- Navigation -->
+                <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="20" Margin="0,20,0,0">
+                    <Button Content="上一題" Command="{Binding GoPreviousCommand}" Width="100" HorizontalContentAlignment="Center"/>
+                    <Button Content="下一題" Command="{Binding GoNextCommand}" Width="100" HorizontalContentAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+
             <!-- Result View -->
             <StackPanel IsVisible="{Binding CurrentState, Converter={StaticResource EqualsConverter}, ConverterParameter={x:Static vm:AppState.Result}}"
                         VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="20">
@@ -92,8 +161,13 @@
                            Foreground="#4CAF50" 
                            HorizontalAlignment="Center"/>
                 <TextBlock Text="及格標準：60 分" FontSize="16" HorizontalAlignment="Center"/>
-                <Button Content="回到首頁" Command="{Binding BackToHomeCommand}" 
-                        Padding="20,10" CornerRadius="5"/>
+                
+                <StackPanel Orientation="Horizontal" Spacing="20" HorizontalAlignment="Center">
+                    <Button Content="查看題目" Command="{Binding ReviewTestCommand}" 
+                            Padding="20,10" CornerRadius="5" Background="#2196F3" Foreground="White"/>
+                    <Button Content="回到首頁" Command="{Binding BackToHomeCommand}" 
+                            Padding="20,10" CornerRadius="5"/>
+                </StackPanel>
             </StackPanel>
         </Panel>
     </Grid>

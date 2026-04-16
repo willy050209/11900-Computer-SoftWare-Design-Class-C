@@ -14,7 +14,8 @@ public enum AppState
 {
     Home,
     Testing,
-    Result
+    Result,
+    Review
 }
 
 public partial class MainViewModel : ObservableObject
@@ -92,23 +93,17 @@ public partial class MainViewModel : ObservableObject
     private bool CanGoNext() => CurrentQuestionIndex < TestItems.Count - 1;
 
     [RelayCommand]
-    private void SelectOption(OptionItem? option)
-    {
-        if (CurrentQuestion != null && option != null)
-        {
-            int index = Array.IndexOf(CurrentQuestion.ShuffledOptions, option);
-            if (index != -1)
-            {
-                CurrentQuestion.SelectOption(index);
-            }
-        }
-    }
-
-    [RelayCommand]
     private void SubmitTest()
     {
         Score = _testEngine.CalculateScore(TestItems);
         CurrentState = AppState.Result;
+    }
+
+    [RelayCommand]
+    private void ReviewTest()
+    {
+        CurrentQuestionIndex = 0;
+        CurrentState = AppState.Review;
     }
 
     [RelayCommand]
