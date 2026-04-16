@@ -1,0 +1,100 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:SubjectTestSystem.Desktop.ViewModels"
+        xmlns:models="using:SubjectTestSystem.Shared.Models"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+        x:Class="SubjectTestSystem.Desktop.MainWindow"
+        x:DataType="vm:MainViewModel"
+        Title="學科檢定模擬系統">
+
+    <Grid Margin="20" RowDefinitions="Auto, *">
+        <!-- Error Bar -->
+        <Border Grid.Row="0" Background="#F44336" CornerRadius="5" Margin="0,0,0,10" Padding="10"
+                IsVisible="{Binding ErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+            <TextBlock Text="{Binding ErrorMessage}" Foreground="White" HorizontalAlignment="Center"/>
+        </Border>
+
+        <!-- Main Content Area -->
+        <Panel Grid.Row="1">
+            <!-- Home View -->
+            <StackPanel IsVisible="{Binding CurrentState, Converter={StaticResource EqualsConverter}, ConverterParameter={x:Static vm:AppState.Home}}"
+                        VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="20">
+                <TextBlock Text="電腦軟體設計丙級 - 學科模擬測驗" FontSize="28" FontWeight="Bold" HorizontalAlignment="Center"/>
+                <TextBlock Text="包含：專業科目(60題) + 共同科目(20題)" FontSize="16" 
+                           Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" 
+                           HorizontalAlignment="Center"/>
+                <Button Content="開始測驗" Command="{Binding StartTestCommand}" 
+                        Padding="30,15" Background="{DynamicResource SystemAccentColor}" Foreground="White" FontSize="20" CornerRadius="5"/>
+            </StackPanel>
+
+            <!-- Testing View -->
+            <Grid IsVisible="{Binding CurrentState, Converter={StaticResource EqualsConverter}, ConverterParameter={x:Static vm:AppState.Testing}}"
+                  RowDefinitions="Auto, *, Auto">
+                
+                <!-- Header -->
+                <Grid Grid.Row="0" ColumnDefinitions="*, Auto" Margin="0,0,0,20">
+                    <StackPanel>
+                        <TextBlock Text="{Binding CurrentQuestion.OriginalQuestion.WorkItem}" FontSize="14" 
+                                   Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                        <TextBlock FontSize="18" FontWeight="SemiBold">
+                            <Run Text="第"/>
+                            <Run Text="{Binding CurrentQuestionIndex, Converter={StaticResource IndexToDisplayConverter}}"/>
+                            <Run Text="題 / 共"/>
+                            <Run Text="{Binding TestItems.Count}"/>
+                            <Run Text="題"/>
+                        </TextBlock>
+                    </StackPanel>
+                    <Button Grid.Column="1" Content="交卷" Command="{Binding SubmitTestCommand}" 
+                            Background="#F44336" Foreground="White" VerticalAlignment="Center"/>
+                </Grid>
+
+                <!-- Question Area -->
+                <ScrollViewer Grid.Row="1">
+                    <StackPanel Spacing="20">
+                        <TextBlock Text="{Binding CurrentQuestion.OriginalQuestion.Question}" FontSize="20" TextWrapping="Wrap"/>
+                        
+                        <ListBox ItemsSource="{Binding CurrentQuestion.ShuffledOptions}"
+                                 SelectedIndex="{Binding CurrentQuestion.SelectedOptionIndex, Mode=OneWay}"
+                                 Background="Transparent">
+
+                            <ListBox.ItemTemplate>
+                                <DataTemplate x:DataType="models:OptionItem">
+                                    <RadioButton Margin="0,5"
+                                                 IsChecked="{Binding $parent[ListBoxItem].IsSelected, Mode=OneWay}"
+                                                 Content="{Binding Text}"
+                                                 Command="{Binding $parent[vm:MainViewModel].SelectOptionCommand}"
+                                                 CommandParameter="{Binding}"/>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                            <ListBox.Styles>
+                                <Style Selector="ListBoxItem">
+                                    <Setter Property="Padding" Value="10,5"/>
+                                </Style>
+                            </ListBox.Styles>
+                        </ListBox>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- Navigation -->
+                <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="20" Margin="0,20,0,0">
+                    <Button Content="上一題" Command="{Binding GoPreviousCommand}" Width="100" HorizontalContentAlignment="Center"/>
+                    <Button Content="下一題" Command="{Binding GoNextCommand}" Width="100" HorizontalContentAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- Result View -->
+            <StackPanel IsVisible="{Binding CurrentState, Converter={StaticResource EqualsConverter}, ConverterParameter={x:Static vm:AppState.Result}}"
+                        VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="20">
+                <TextBlock Text="測驗結束" FontSize="32" FontWeight="Bold" HorizontalAlignment="Center"/>
+                <TextBlock Text="{Binding Score, StringFormat='您的得分：{0:F1} 分'}" FontSize="24" 
+                           Foreground="#4CAF50" 
+                           HorizontalAlignment="Center"/>
+                <TextBlock Text="及格標準：60 分" FontSize="16" HorizontalAlignment="Center"/>
+                <Button Content="回到首頁" Command="{Binding BackToHomeCommand}" 
+                        Padding="20,10" CornerRadius="5"/>
+            </StackPanel>
+        </Panel>
+    </Grid>
+</Window>

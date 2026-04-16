@@ -1,0 +1,120 @@
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using SubjectTestSystem.Shared.Models;
+using SubjectTestSystem.Shared.Services;
+
+namespace SubjectTestSystem.Desktop.ViewModels;
+
+public enum AppState
+{
+    Home,
+    Testing,
+    Result
+}
+
+public partial class MainViewModel : ObservableObject
+{
+    private readonly IQuestionRepository _repository;
+    private readonly ITestEngineService _testEngine;
+
+    [ObservableProperty]
+    private AppState _currentState = AppState.Home;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CurrentQuestion))]
+    [NotifyCanExecuteChangedFor(nameof(GoNextCommand))]
+    private ObservableCollection<TestItem> _testItems = [];
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CurrentQuestion))]
+    [NotifyCanExecuteChangedFor(nameof(GoPreviousCommand))]
+    [NotifyCanExecuteChangedFor(nameof(GoNextCommand))]
+    private int _currentQuestionIndex = 0;
+
+    public TestItem? CurrentQuestion => TestItems.Count > CurrentQuestionIndex ? TestItems[CurrentQuestionIndex] : null;
+
+    [ObservableProperty]
+    private double _score;
+
+    public MainViewModel(IQuestionRepository repository, ITestEngineService testEngine)
+    {
+        _repository = repository;
+        _testEngine = testEngine;
+    }
+
+    [ObservableProperty]
+    private string? _errorMessage;
+
+    [RelayCommand]
+    private async Task StartTestAsync()
+    {
+        ErrorMessage = null;
+        try
+        {
+            var allQuestions = (await _repository.GetAllQuestionsAsync()).ToList();
+            if (!allQuestions.Any())
+            {
+                ErrorMessage = "題庫檔案為空或載入失敗。";
+                return;
+            }
+
+            var selectedItems = _testEngine.GenerateTest(allQuestions).ToList();
+            if (!selectedItems.Any())
+            {
+                ErrorMessage = "無法從題庫中抽選出有效題目。";
+                return;
+            }
+
+            TestItems = new ObservableCollection<TestItem>(selectedItems);
+            CurrentQuestionIndex = 0;
+            CurrentState = AppState.Testing;
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"發生錯誤: {ex.Message}";
+            Console.WriteLine(ex);
+        }
+    }
+
+    [RelayCommand(CanExecute = nameof(CanGoPrevious))]
+    private void GoPrevious() => CurrentQuestionIndex--;
+
+    private bool CanGoPrevious() => CurrentQuestionIndex > 0;
+
+    [RelayCommand(CanExecute = nameof(CanGoNext))]
+    private void GoNext() => CurrentQuestionIndex++;
+
+    private bool CanGoNext() => CurrentQuestionIndex < TestItems.Count - 1;
+
+    [RelayCommand]
+    private void SelectOption(OptionItem? option)
+    {
+        if (CurrentQuestion != null && option != null)
+        {
+            int index = Array.IndexOf(CurrentQuestion.ShuffledOptions, option);
+            if (index != -1)
+            {
+                CurrentQuestion.SelectOption(index);
+            }
+        }
+    }
+
+    [RelayCommand]
+    private void SubmitTest()
+    {
+        Score = _testEngine.CalculateScore(TestItems);
+        CurrentState = AppState.Result;
+    }
+
+    [RelayCommand]
+    private void BackToHome()
+    {
+        CurrentState = AppState.Home;
+        TestItems.Clear();
+    }
+}

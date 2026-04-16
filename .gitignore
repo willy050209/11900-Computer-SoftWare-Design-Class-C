@@ -16,9 +16,10 @@ dist/
 
 # Project Specific
 *.SM
-*.pdf
 !ans.pdf
 !119003B14.pdf
+!學科/*.pdf
+!test.pdf
 
 # Temporary files
 .gemini/
