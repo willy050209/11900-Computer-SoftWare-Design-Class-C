@@ -177,6 +177,12 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void BackToResult()
+    {
+        CurrentState = AppState.Result;
+    }
+
+    [RelayCommand]
     private void BackToHome()
     {
         _timer.Stop();
