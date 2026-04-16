@@ -41,7 +41,7 @@
                   RowDefinitions="Auto, *, Auto" ColumnDefinitions="200, *">
                 
                 <!-- Header -->
-                <Grid Grid.Row="0" Grid.ColumnSpan="2" ColumnDefinitions="*, Auto" Margin="0,0,0,20">
+                <Grid Grid.Row="0" Grid.ColumnSpan="2" ColumnDefinitions="*, Auto, Auto" Margin="0,0,0,20">
                     <StackPanel>
                         <TextBlock Text="{Binding CurrentQuestion.OriginalQuestion.WorkItem}" FontSize="14" 
                                    Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
@@ -53,7 +53,9 @@
                             <Run Text="題"/>
                         </TextBlock>
                     </StackPanel>
-                    <Button Grid.Column="1" Content="交卷" Command="{Binding RequestSubmitCommand}" 
+                    <CheckBox Grid.Column="1" Content="標記此題" IsChecked="{Binding CurrentQuestion.IsMarked}" 
+                              VerticalAlignment="Center" Margin="0,0,20,0" Foreground="#FF9800"/>
+                    <Button Grid.Column="2" Content="交卷" Command="{Binding RequestSubmitCommand}" 
                             Background="#F44336" Foreground="White" VerticalAlignment="Center"/>
                 </Grid>
 
@@ -90,11 +92,7 @@
                 <!-- Question Area -->
                 <ScrollViewer Grid.Row="1" Grid.Column="1" Padding="20,0,0,0" DataContext="{Binding CurrentQuestion}">
                     <StackPanel Spacing="20" IsVisible="{Binding $self.DataContext, Converter={x:Static ObjectConverters.IsNotNull}}">
-                        <Grid ColumnDefinitions="*, Auto">
-                            <TextBlock Text="{Binding OriginalQuestion.Question}" FontSize="20" TextWrapping="Wrap"/>
-                            <CheckBox Grid.Column="1" Content="標記此題" IsChecked="{Binding IsMarked}" 
-                                      VerticalAlignment="Top" Margin="10,0,0,0" Foreground="#FF9800"/>
-                        </Grid>
+                        <TextBlock Text="{Binding OriginalQuestion.Question}" FontSize="20" TextWrapping="Wrap"/>
                         
                         <ListBox ItemsSource="{Binding ShuffledOptions}"
                                  SelectedIndex="{Binding SelectedOptionIndex, Mode=TwoWay}"
