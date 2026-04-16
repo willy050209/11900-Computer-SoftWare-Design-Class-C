@@ -30,6 +30,9 @@ public partial class TestItem : ObservableObject
 
     public bool IsAnswered => SelectedOptionIndex != -1;
 
+    [ObservableProperty]
+    private bool _isMarked;
+
     public void SelectOption(int index)
     {
         SelectedOptionIndex = index;

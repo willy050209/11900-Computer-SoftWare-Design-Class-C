@@ -51,6 +51,15 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private string? _errorMessage;
 
+    [ObservableProperty]
+    private bool _showSubmitConfirmation;
+
+    [ObservableProperty]
+    private int _unansweredCount;
+
+    [ObservableProperty]
+    private int _markedCount;
+
     [RelayCommand]
     private async Task StartTestAsync()
     {
@@ -93,8 +102,32 @@ public partial class MainViewModel : ObservableObject
     private bool CanGoNext() => CurrentQuestionIndex < TestItems.Count - 1;
 
     [RelayCommand]
-    private void SubmitTest()
+    private void ToggleMark()
     {
+        if (CurrentQuestion != null)
+        {
+            CurrentQuestion.IsMarked = !CurrentQuestion.IsMarked;
+        }
+    }
+
+    [RelayCommand]
+    private void RequestSubmit()
+    {
+        UnansweredCount = TestItems.Count(i => !i.IsAnswered);
+        MarkedCount = TestItems.Count(i => i.IsMarked);
+        ShowSubmitConfirmation = true;
+    }
+
+    [RelayCommand]
+    private void CancelSubmit()
+    {
+        ShowSubmitConfirmation = false;
+    }
+
+    [RelayCommand]
+    private void ConfirmSubmit()
+    {
+        ShowSubmitConfirmation = false;
         Score = _testEngine.CalculateScore(TestItems);
         CurrentState = AppState.Result;
     }

@@ -38,10 +38,10 @@
 
             <!-- Testing View -->
             <Grid IsVisible="{Binding CurrentState, Converter={StaticResource EqualsConverter}, ConverterParameter={x:Static vm:AppState.Testing}}"
-                  RowDefinitions="Auto, *, Auto">
+                  RowDefinitions="Auto, *, Auto" ColumnDefinitions="200, *">
                 
                 <!-- Header -->
-                <Grid Grid.Row="0" ColumnDefinitions="*, Auto" Margin="0,0,0,20">
+                <Grid Grid.Row="0" Grid.ColumnSpan="2" ColumnDefinitions="*, Auto" Margin="0,0,0,20">
                     <StackPanel>
                         <TextBlock Text="{Binding CurrentQuestion.OriginalQuestion.WorkItem}" FontSize="14" 
                                    Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
@@ -53,14 +53,48 @@
                             <Run Text="題"/>
                         </TextBlock>
                     </StackPanel>
-                    <Button Grid.Column="1" Content="交卷" Command="{Binding SubmitTestCommand}" 
+                    <Button Grid.Column="1" Content="交卷" Command="{Binding RequestSubmitCommand}" 
                             Background="#F44336" Foreground="White" VerticalAlignment="Center"/>
                 </Grid>
 
+                <!-- Navigation Sidebar (Testing) -->
+                <Border Grid.Row="1" Grid.Column="0" Background="{DynamicResource SystemControlBackgroundAltHighBrush}" 
+                        BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="0,0,1,0" Padding="0,0,10,0">
+                    <ListBox ItemsSource="{Binding TestItems}" 
+                             SelectedIndex="{Binding CurrentQuestionIndex, Mode=TwoWay}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate x:DataType="models:TestItem">
+                                <Border Padding="5">
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <TextBlock Text="{Binding $parent[ListBox].((vm:MainViewModel)DataContext).TestItems, Converter={StaticResource IndexToDisplayConverter}, ConverterParameter={Binding}}"
+                                                   Width="30" VerticalAlignment="Center"/>
+                                        <Panel VerticalAlignment="Center">
+                                            <!-- Answered Status -->
+                                            <TextBlock Text="✅" IsVisible="{Binding IsAnswered}" Foreground="#2E7D32"/>
+                                            <TextBlock Text="⚪" IsVisible="{Binding !IsAnswered}" Foreground="#9E9E9E"/>
+                                        </Panel>
+                                        <!-- Mark Status -->
+                                        <TextBlock Text="🚩" IsVisible="{Binding IsMarked}" Foreground="#FF9800" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                        <ListBox.Styles>
+                            <Style Selector="ListBoxItem">
+                                <Setter Property="Padding" Value="2"/>
+                            </Style>
+                        </ListBox.Styles>
+                    </ListBox>
+                </Border>
+
                 <!-- Question Area -->
-                <ScrollViewer Grid.Row="1" DataContext="{Binding CurrentQuestion}">
+                <ScrollViewer Grid.Row="1" Grid.Column="1" Padding="20,0,0,0" DataContext="{Binding CurrentQuestion}">
                     <StackPanel Spacing="20" IsVisible="{Binding $self.DataContext, Converter={x:Static ObjectConverters.IsNotNull}}">
-                        <TextBlock Text="{Binding OriginalQuestion.Question}" FontSize="20" TextWrapping="Wrap"/>
+                        <Grid ColumnDefinitions="*, Auto">
+                            <TextBlock Text="{Binding OriginalQuestion.Question}" FontSize="20" TextWrapping="Wrap"/>
+                            <CheckBox Grid.Column="1" Content="標記此題" IsChecked="{Binding IsMarked}" 
+                                      VerticalAlignment="Top" Margin="10,0,0,0" Foreground="#FF9800"/>
+                        </Grid>
                         
                         <ListBox ItemsSource="{Binding ShuffledOptions}"
                                  SelectedIndex="{Binding SelectedOptionIndex, Mode=TwoWay}"
@@ -83,11 +117,47 @@
                 </ScrollViewer>
 
                 <!-- Navigation -->
-                <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="20" Margin="0,20,0,0">
+                <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="20" Margin="0,20,0,0">
                     <Button Content="上一題" Command="{Binding GoPreviousCommand}" Width="100" HorizontalContentAlignment="Center"/>
                     <Button Content="下一題" Command="{Binding GoNextCommand}" Width="100" HorizontalContentAlignment="Center"/>
                 </StackPanel>
             </Grid>
+
+            <!-- Submit Confirmation Overlay -->
+            <Border IsVisible="{Binding ShowSubmitConfirmation}" Background="#80000000" Grid.RowSpan="2">
+                <Border Background="{DynamicResource SystemAltHighColor}" HorizontalAlignment="Center" VerticalAlignment="Center" 
+                        Padding="30" CornerRadius="10" BoxShadow="0 5 15 0 #40000000">
+                    <StackPanel Spacing="20" Width="300">
+                        <TextBlock Text="確認交卷" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center"/>
+                        
+                        <Border Background="#FFF3E0" Padding="15" CornerRadius="5" 
+                                IsVisible="{Binding !!UnansweredCount}">
+                            <TextBlock Foreground="#E65100" TextWrapping="Wrap" HorizontalAlignment="Center">
+                                <Run Text="⚠ 您還有 "/>
+                                <Run Text="{Binding UnansweredCount}" FontWeight="Bold"/>
+                                <Run Text=" 題尚未回答。"/>
+                            </TextBlock>
+                        </Border>
+
+                        <Border Background="#E1F5FE" Padding="15" CornerRadius="5" 
+                                IsVisible="{Binding !!MarkedCount}">
+                            <TextBlock Foreground="#0277BD" TextWrapping="Wrap" HorizontalAlignment="Center">
+                                <Run Text="ℹ 您標記了 "/>
+                                <Run Text="{Binding MarkedCount}" FontWeight="Bold"/>
+                                <Run Text=" 題供後續檢查。"/>
+                            </TextBlock>
+                        </Border>
+
+                        <TextBlock Text="確定要交卷並計算分數嗎？" HorizontalAlignment="Center"/>
+                        
+                        <StackPanel Orientation="Horizontal" Spacing="20" HorizontalAlignment="Center">
+                            <Button Content="繼續作答" Command="{Binding CancelSubmitCommand}" Padding="20,10"/>
+                            <Button Content="確認交卷" Command="{Binding ConfirmSubmitCommand}" 
+                                    Padding="20,10" Background="#F44336" Foreground="White"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </Border>
 
             <!-- Review View -->
             <Grid IsVisible="{Binding CurrentState, Converter={StaticResource EqualsConverter}, ConverterParameter={x:Static vm:AppState.Review}}"
