@@ -8,6 +8,8 @@ using CommunityToolkit.Mvvm.Input;
 using SubjectTestSystem.Shared.Models;
 using SubjectTestSystem.Shared.Services;
 
+using Avalonia.Threading;
+
 namespace SubjectTestSystem.Desktop.ViewModels;
 
 public enum AppState
@@ -22,6 +24,8 @@ public partial class MainViewModel : ObservableObject
 {
     private readonly IQuestionRepository _repository;
     private readonly ITestEngineService _testEngine;
+    private readonly DispatcherTimer _timer;
+    private DateTime _startTime;
 
     [ObservableProperty]
     private AppState _currentState = AppState.Home;
@@ -42,10 +46,34 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private double _score;
 
+    [ObservableProperty]
+    private int _correctCount;
+
+    [ObservableProperty]
+    private int _incorrectCount;
+
+    [ObservableProperty]
+    private string _elapsedTime = "00:00:00";
+
     public MainViewModel(IQuestionRepository repository, ITestEngineService testEngine)
     {
         _repository = repository;
         _testEngine = testEngine;
+        
+        _timer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromSeconds(1)
+        };
+        _timer.Tick += (s, e) => UpdateElapsedTime();
+    }
+
+    private void UpdateElapsedTime()
+    {
+        if (CurrentState == AppState.Testing)
+        {
+            var duration = DateTime.Now - _startTime;
+            ElapsedTime = duration.ToString(@"hh\:mm\:ss");
+        }
     }
 
     [ObservableProperty]
@@ -83,6 +111,10 @@ public partial class MainViewModel : ObservableObject
             TestItems = new ObservableCollection<TestItem>(selectedItems);
             CurrentQuestionIndex = 0;
             CurrentState = AppState.Testing;
+            
+            _startTime = DateTime.Now;
+            ElapsedTime = "00:00:00";
+            _timer.Start();
         }
         catch (Exception ex)
         {
@@ -128,6 +160,11 @@ public partial class MainViewModel : ObservableObject
     private void ConfirmSubmit()
     {
         ShowSubmitConfirmation = false;
+        _timer.Stop();
+        
+        CorrectCount = TestItems.Count(i => i.IsCorrect);
+        IncorrectCount = TestItems.Count(i => !i.IsCorrect);
+        
         Score = _testEngine.CalculateScore(TestItems);
         CurrentState = AppState.Result;
     }
@@ -142,6 +179,7 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void BackToHome()
     {
+        _timer.Stop();
         CurrentState = AppState.Home;
         TestItems.Clear();
     }

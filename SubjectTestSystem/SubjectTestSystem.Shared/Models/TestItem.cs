@@ -16,11 +16,24 @@ public partial class TestItem : ObservableObject
     public OptionItem[] ShuffledOptions { get; }
     public int CorrectAnswerIndex { get; }
 
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(SelectedOption))]
-    [NotifyPropertyChangedFor(nameof(IsCorrect))]
-    [NotifyPropertyChangedFor(nameof(IsAnswered))]
     private int _selectedOptionIndex = -1;
+    public int SelectedOptionIndex
+    {
+        get => _selectedOptionIndex;
+        set
+        {
+            // Only update if the value is different.
+            // Critical fix: Ignore updates to -1 if we already have a selection.
+            // This prevents the ListBox from clearing our selection during rapid navigation transitions.
+            if (_selectedOptionIndex != value && (value != -1 || _selectedOptionIndex == -1))
+            {
+                SetProperty(ref _selectedOptionIndex, value);
+                OnPropertyChanged(nameof(SelectedOption));
+                OnPropertyChanged(nameof(IsCorrect));
+                OnPropertyChanged(nameof(IsAnswered));
+            }
+        }
+    }
 
     public OptionItem? SelectedOption => (SelectedOptionIndex >= 0 && SelectedOptionIndex < ShuffledOptions.Length)
         ? ShuffledOptions[SelectedOptionIndex]

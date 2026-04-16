@@ -42,7 +42,7 @@
                   RowDefinitions="Auto, *, Auto" ColumnDefinitions="200, *">
                 
                 <!-- Header -->
-                <Grid Grid.Row="0" Grid.ColumnSpan="2" ColumnDefinitions="*, Auto, Auto" Margin="0,0,0,20">
+                <Grid Grid.Row="0" Grid.ColumnSpan="2" ColumnDefinitions="*, Auto, Auto, Auto" Margin="0,0,0,20">
                     <StackPanel>
                         <TextBlock Text="{Binding CurrentQuestion.OriginalQuestion.WorkItem}" FontSize="14" 
                                    Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
@@ -54,9 +54,16 @@
                             <Run Text="題"/>
                         </TextBlock>
                     </StackPanel>
-                    <CheckBox Grid.Column="1" Content="標記此題" IsChecked="{Binding CurrentQuestion.IsMarked}" 
+                    
+                    <!-- Time Display -->
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,20,0" Orientation="Horizontal" Spacing="5">
+                        <TextBlock Text="⏱" VerticalAlignment="Center" Foreground="{DynamicResource SystemAccentColor}"/>
+                        <TextBlock Text="{Binding ElapsedTime}" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <CheckBox Grid.Column="2" Content="標記此題" IsChecked="{Binding CurrentQuestion.IsMarked}" 
                               VerticalAlignment="Center" Margin="0,0,20,0" Foreground="#FF9800"/>
-                    <Button Grid.Column="2" Content="交卷" Command="{Binding RequestSubmitCommand}" 
+                    <Button Grid.Column="3" Content="交卷" Command="{Binding RequestSubmitCommand}" 
                             Background="#F44336" Foreground="White" VerticalAlignment="Center"/>
                 </Grid>
 
@@ -288,16 +295,35 @@
             <StackPanel IsVisible="{Binding CurrentState, Converter={StaticResource EqualsConverter}, ConverterParameter={x:Static vm:AppState.Result}}"
                         VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="20">
                 <TextBlock Text="測驗結束" FontSize="32" FontWeight="Bold" HorizontalAlignment="Center"/>
-                <TextBlock Text="{Binding Score, StringFormat='您的得分：{0:F1} 分'}" FontSize="24" 
-                           Foreground="#4CAF50" 
-                           HorizontalAlignment="Center"/>
-                <TextBlock Text="及格標準：60 分" FontSize="16" HorizontalAlignment="Center"/>
+                
+                <Border Background="{DynamicResource SystemAccentColor}" Padding="30,20" CornerRadius="10">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="{Binding Score, StringFormat='總分：{0:F2} 分'}" FontSize="36" 
+                                   Foreground="White" FontWeight="Bold" HorizontalAlignment="Center"/>
+                        <TextBlock Text="及格標準：60.00 分" FontSize="14" Foreground="White" Opacity="0.8" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+
+                <Grid ColumnDefinitions="*, *, *" Width="400" Margin="0,10">
+                    <StackPanel Grid.Column="0" Spacing="5" HorizontalAlignment="Center">
+                        <TextBlock Text="答對題數" FontSize="14" Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" HorizontalAlignment="Center"/>
+                        <TextBlock Text="{Binding CorrectCount}" FontSize="24" FontWeight="Bold" Foreground="#4CAF50" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Spacing="5" HorizontalAlignment="Center">
+                        <TextBlock Text="答錯題數" FontSize="14" Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" HorizontalAlignment="Center"/>
+                        <TextBlock Text="{Binding IncorrectCount}" FontSize="24" FontWeight="Bold" Foreground="#F44336" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2" Spacing="5" HorizontalAlignment="Center">
+                        <TextBlock Text="測驗時間" FontSize="14" Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" HorizontalAlignment="Center"/>
+                        <TextBlock Text="{Binding ElapsedTime}" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Grid>
                 
                 <StackPanel Orientation="Horizontal" Spacing="20" HorizontalAlignment="Center">
                     <Button Content="查看題目" Command="{Binding ReviewTestCommand}" 
-                            Padding="20,10" CornerRadius="5" Background="#2196F3" Foreground="White"/>
+                            Padding="25,12" CornerRadius="5" Background="#2196F3" Foreground="White" FontSize="16"/>
                     <Button Content="回到首頁" Command="{Binding BackToHomeCommand}" 
-                            Padding="20,10" CornerRadius="5"/>
+                            Padding="25,12" CornerRadius="5" FontSize="16"/>
                 </StackPanel>
             </StackPanel>
         </Panel>

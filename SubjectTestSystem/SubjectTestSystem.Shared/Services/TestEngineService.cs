@@ -52,7 +52,8 @@ public sealed class TestEngineService : ITestEngineService
         if (items.Count == 0) return 0;
 
         int correctCount = items.Count(i => i.IsCorrect);
-        return (double)correctCount / items.Count * 100.0;
+        double rawScore = (double)correctCount / items.Count * 100.0;
+        return Math.Round(rawScore, 2);
     }
 
     /// <summary>
