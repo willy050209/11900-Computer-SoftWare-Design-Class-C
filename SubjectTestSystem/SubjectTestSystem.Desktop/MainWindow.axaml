@@ -69,8 +69,14 @@
                             <DataTemplate x:DataType="models:TestItem">
                                 <Border Padding="5">
                                     <StackPanel Orientation="Horizontal" Spacing="10">
-                                        <TextBlock Text="{Binding $parent[ListBox].((vm:MainViewModel)DataContext).TestItems, Converter={StaticResource IndexToDisplayConverter}, ConverterParameter={Binding}}"
-                                                   Width="30" VerticalAlignment="Center"/>
+                                        <TextBlock Width="30" VerticalAlignment="Center">
+                                            <TextBlock.Text>
+                                                <MultiBinding Converter="{StaticResource IndexToDisplayConverter}">
+                                                    <Binding Path="$parent[ListBox].((vm:MainViewModel)DataContext).TestItems" />
+                                                    <Binding Path="." />
+                                                </MultiBinding>
+                                            </TextBlock.Text>
+                                        </TextBlock>
                                         <Panel VerticalAlignment="Center">
                                             <!-- Answered Status -->
                                             <TextBlock Text="✅" IsVisible="{Binding IsAnswered}" Foreground="#2E7D32"/>
@@ -187,8 +193,14 @@
                             <DataTemplate x:DataType="models:TestItem">
                                 <Border Padding="5">
                                     <StackPanel Orientation="Horizontal" Spacing="10">
-                                        <TextBlock Text="{Binding $parent[ListBox].((vm:MainViewModel)DataContext).TestItems, Converter={StaticResource IndexToDisplayConverter}, ConverterParameter={Binding}}"
-                                                   Width="30" VerticalAlignment="Center"/>
+                                        <TextBlock Width="30" VerticalAlignment="Center">
+                                            <TextBlock.Text>
+                                                <MultiBinding Converter="{StaticResource IndexToDisplayConverter}">
+                                                    <Binding Path="$parent[ListBox].((vm:MainViewModel)DataContext).TestItems" />
+                                                    <Binding Path="." />
+                                                </MultiBinding>
+                                            </TextBlock.Text>
+                                        </TextBlock>
                                         <Panel VerticalAlignment="Center">
                                             <TextBlock Text="✅" IsVisible="{Binding IsCorrect}" Foreground="#2E7D32"/>
                                             
@@ -218,11 +230,11 @@
                 </Border>
 
                 <!-- Question Area -->
-                <ScrollViewer Grid.Row="1" Grid.Column="1" Padding="20,0,0,0">
+                <ScrollViewer Grid.Row="1" Grid.Column="1" Padding="20,0,0,0" DataContext="{Binding CurrentQuestion}">
                     <StackPanel Spacing="20">
-                        <TextBlock Text="{Binding CurrentQuestion.OriginalQuestion.Question}" FontSize="20" TextWrapping="Wrap"/>
+                        <TextBlock Text="{Binding OriginalQuestion.Question}" FontSize="20" TextWrapping="Wrap"/>
                         
-                        <ItemsControl ItemsSource="{Binding CurrentQuestion.ShuffledOptions}">
+                        <ItemsControl ItemsSource="{Binding ShuffledOptions}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="models:OptionItem">
                                     <Border Margin="0,5" Padding="15,10" CornerRadius="5">
@@ -248,18 +260,18 @@
                         <!-- Correct/Wrong summary for this question -->
                         <Border Padding="15" CornerRadius="8" Margin="0,10,0,0">
                             <StackPanel Orientation="Horizontal" Spacing="10">
-                                <TextBlock Text="✅ 這題答對了！" IsVisible="{Binding CurrentQuestion.IsCorrect}" Foreground="#2E7D32" FontWeight="Bold" FontSize="18"/>
+                                <TextBlock Text="✅ 這題答對了！" IsVisible="{Binding IsCorrect}" Foreground="#2E7D32" FontWeight="Bold" FontSize="18"/>
                                 
                                 <TextBlock Text="❌ 這題答錯了。" Foreground="#C62828" FontWeight="Bold" FontSize="18">
                                     <TextBlock.IsVisible>
                                         <MultiBinding Converter="{x:Static BoolConverters.And}">
-                                            <Binding Path="CurrentQuestion.IsAnswered" />
-                                            <Binding Path="CurrentQuestion.IsCorrect" Converter="{StaticResource BoolToVis}" ConverterParameter="invert" />
+                                            <Binding Path="IsAnswered" />
+                                            <Binding Path="IsCorrect" Converter="{StaticResource BoolToVis}" ConverterParameter="invert" />
                                         </MultiBinding>
                                     </TextBlock.IsVisible>
                                 </TextBlock>
                                 
-                                <TextBlock Text="⚪ 您沒有回答這題。" IsVisible="{Binding CurrentQuestion.IsAnswered, Converter={StaticResource BoolToVis}, ConverterParameter=invert}" Foreground="#9E9E9E" FontWeight="Bold" FontSize="18"/>
+                                <TextBlock Text="⚪ 您沒有回答這題。" IsVisible="{Binding IsAnswered, Converter={StaticResource BoolToVis}, ConverterParameter=invert}" Foreground="#9E9E9E" FontWeight="Bold" FontSize="18"/>
                             </StackPanel>
                         </Border>
                     </StackPanel>
