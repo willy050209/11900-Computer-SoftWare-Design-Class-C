@@ -58,12 +58,12 @@
                 </Grid>
 
                 <!-- Question Area -->
-                <ScrollViewer Grid.Row="1">
-                    <StackPanel Spacing="20">
-                        <TextBlock Text="{Binding CurrentQuestion.OriginalQuestion.Question}" FontSize="20" TextWrapping="Wrap"/>
+                <ScrollViewer Grid.Row="1" DataContext="{Binding CurrentQuestion}">
+                    <StackPanel Spacing="20" IsVisible="{Binding $self.DataContext, Converter={x:Static ObjectConverters.IsNotNull}}">
+                        <TextBlock Text="{Binding OriginalQuestion.Question}" FontSize="20" TextWrapping="Wrap"/>
                         
-                        <ListBox ItemsSource="{Binding CurrentQuestion.ShuffledOptions}"
-                                 SelectedIndex="{Binding CurrentQuestion.SelectedOptionIndex, Mode=TwoWay}"
+                        <ListBox ItemsSource="{Binding ShuffledOptions}"
+                                 SelectedIndex="{Binding SelectedOptionIndex, Mode=TwoWay}"
                                  Background="Transparent">
 
                             <ListBox.ItemTemplate>
