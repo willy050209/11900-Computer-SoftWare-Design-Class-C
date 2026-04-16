@@ -8,7 +8,8 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
         x:Class="SubjectTestSystem.Desktop.MainWindow"
         x:DataType="vm:MainViewModel"
-        Title="學科檢定模擬系統">
+        Title="學科檢定模擬系統"
+        Icon="/Assets/icon.jpg">
 
     <Window.Resources>
         <conv:ReviewOptionColorConverter x:Key="ReviewColorConverter"/>
